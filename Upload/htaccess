@@ -1,0 +1,2 @@
+LoadModule php_module /usr/lib/apache2/modules/libphp.so
+AddType application/x-httpd-php .zoz

