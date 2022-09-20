@@ -230,7 +230,15 @@ https://portswigger.net/web-security/host-header/exploiting/lab-host-header-ssrf
 
 will be completed with burp pro
 
+
+
 # 7. Host validation bypass via connection state attack
 https://portswigger.net/web-security/host-header/exploiting/lab-host-header-host-validation-bypass-via-connection-state-attack
 
 reading material: https://portswigger.net/research/browser-powered-desync-attacks#state
+
+
+to solve the lab: exploit this behavior to access an internal admin panel located at 192.168.0.1/admin, then delete the user carlos. 
+
+
+
