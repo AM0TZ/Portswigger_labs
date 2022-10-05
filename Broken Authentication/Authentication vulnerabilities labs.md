@@ -1,9 +1,9 @@
-# Authentication vulnerabilities
+# **Authentication vulnerabilities**
 https://portswigger.net/web-security/authentication
 
 
 
-# 1. Lab: Username enumeration via different responses
+# ***1. Lab: Username enumeration via different responses***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-different-responses
 
 To solve the lab, enumerate a valid username, brute-force this user's password, then access their account page. 
@@ -59,7 +59,7 @@ password: **superman**
 sign in with the credentials
 **Done**
 
-# 2. Lab: Username enumeration via subtly different responses
+# ***2. Lab: Username enumeration via subtly different responses***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-subtly-different-responses
 
 To solve the lab, enumerate a valid username, brute-force this user's password, then access their account page. 
@@ -88,7 +88,7 @@ using intruder we iteratre through the passord list and we get 302 redirect - in
 
 # Done
 
-# 3. Lab: Username enumeration via response timing
+# ***3. Lab: Username enumeration via response timing***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-response-timing
 
 To solve the lab, enumerate a valid username, brute-force this user's password, then access their account page. 
@@ -105,11 +105,11 @@ after spoting the delay we get the username, and find password with intruder (30
 # Done!
 
 
-# Vulnerabilities in multi-factor authentication
+# **Vulnerabilities in multi-factor authentication**
 https://portswigger.net/web-security/authentication/multi-factor
 
 
-# 1. Lab: 2FA simple bypass
+# ***1. Lab: 2FA simple bypass***
 https://portswigger.net/web-security/authentication/multi-factor/lab-2fa-simple-bypass
 
 To solve the lab, access Carlos's account page. To solve the lab, access Carlos's account page. 
@@ -118,7 +118,7 @@ as hinted: verification process is flawed and log-in occures already after stage
 
 # DONE
 
-# 2. Lab: 2FA broken logic
+# ***2. Lab: 2FA broken logic***
 https://portswigger.net/web-security/authentication/multi-factor/lab-2fa-broken-logic
 
 to solve the lab, access Carlos's account page. 
@@ -147,28 +147,123 @@ Cookie:	session=tvbtHdBV385CmBSB6FfVZx5XdgNSXM31; verify=carlos
 # Done
 
 
-# 3. Lab: 2FA bypass using a brute-force attack
+# ***3. Lab: 2FA bypass using a brute-force attack***
 https://portswigger.net/web-security/authentication/multi-factor/lab-2fa-bypass-using-a-brute-force-attack
 
 This lab's two-factor authentication is vulnerable to brute-forcing. You have already obtained a valid username and password, but do not have access to the user's 2FA verification code. To solve the lab, brute-force the 2FA code and access Carlos's account page. 
 
+examin login process:
+1. GET /login HTTP/1.1 # Initate login process: user/pass  \[set csrf=value] 
+2. POST /login HTTP/1.1 # set-cookie: \[set session=value] 
+3. GET /login2 HTTP/1.1 #  Initate mfa process: pin  \[set csrf=value] 
+4. POST /login2 HTTP/1.1 # first pin attempt \[set csrf=value] for second try
+5. POST /login2 HTTP/1.1 # second pin attept 
+
+Analaize: to brute force mfa process (stages 4 and 5) we need to do steps 1-3 before each attempts to counter the failed attempts log-out defense mechanism. macro is our go to method:
 
 
+# Macro/Session handaling +  Intruder:
+***solve the lab with macro and intruder***
+
+lets set a macro for the login process:
+
+1. in main window go to **project option** tab --> **session Handling Rules** tab--> **Add** button -->
+
+opens up a window with **Rule description** and **Rule Actions**.
+in **Rule Actions** -->press *Add* button and choose **[run a macro]** --> 
+
+opens up the **Rule Editor** --> press **Add** button 
+
+2. open Macro Recorder: 
+
+choose 3 first request of the 5 req sequence. verify each request inherites previouse response attributes (see **Configure item** button):
+
+request 1: **GET /login HTTP/1.1 # no setting requires but you can see in response the **set [csrf=value]** for the initial login process
+
+request 2: **POST /login HTTP/1.1** # set parameter csrf **derive from prior response** to **reponse 1**, for the username and password set **use preset value** (carlos and montoya)
+
+Request 3: **GET /login2 HTTP/1.1** # no setting requires here either but you can see in response the 
 
 
+3. before exit: copy the login2 url. you will need it in a second.
+
+4. press **OK** button all the way back until **session handling rule editor** and go to **Scope** tab. in **URL Scope** --> press **Add** button and paste **login2 url**. 
+
+5. **OK** yourself back to main screen
+
+6. from proxy send **POST /login2 HTTP/1.1** to intruder and initiate bruce force on the 4 digit nums mfa value. remember to check the **Redirection Always** box in the **intruder options** tab, to have intruder records the actual logged-in **my account** page 
+
+**macro explained:**
+```
+every time intruder sends the request to **POST /login2 HTTP/1.1** the session handler recognized the link as in the scope of the **Rule** and initiate the **macro** assigned to the rule - in our case a 3 steps login process that preseed our mfa guessing paylod.
+
+```
+7. wait for 302 found - this is the loagin. go to my account.
+
+# Done (no.1)
+
+# Turbo Intruder:
+***solve the lab with Turbo intruder script***
+
+first we build the attack with session handling - it works fine but very slow:
+less than the (minimum counter) 1 rps - approx ~0.6 rps.  
+<!-- does burp.engine, required for the macro functionality, also brings the 'non-pro-burper' limitation on speed or is it just the site? TBE -->
+
+```python
+def queueRequests(target, wordlists):
+    engine = RequestEngine(endpoint=target.endpoint,
+                           concurrentConnections=1, # more than 1 will interrup the login process yielding 'invalid csrf token' 400 errors
+                           requestsPerConnection=1000,
+                           engine=Engine.BURP, # use burp engin to enable macros (remember to also check extender box in session handaling scope)
+                           pipeline=False
+                           )
+
+    for pin in range(0,9999): # pin
+        guess = str(pin).zfill(4)
+        engine.queue(target.req, guess)
 
 
+def handleResponse(req, interesting):
+    # currently available attributes are req.status, req.wordcount, req.length and req.response
+    if req.status != 404:
+        table.add(req)
+```
+there are actually 2 tries for each login session - lets make an effort to reduce time by sending 2 guess per login process:
+
+```python
+import time
+
+def queueRequests(target, wordlists):
+    engine = RequestEngine(endpoint=target.endpoint,
+                           concurrentConnections=1,
+                           requestsPerConnection=10,
+                           engine=Engine.BURP, 
+                           pipeline=False
+                           )
+    pin=1987 # for on-the-fly a/b speed testing 
+    for i in range(5000):
+        guess = str(pin).zfill(4)
+        engine.queue(target.req, guess)
+        pin += 1
+        guess = str(pin).zfill(4)
+        engine.queue(target.req, guess)
+        
+def handleResponse(req, interesting):
+    # currently available attributes are req.status, req.wordcount, req.length and req.response
+    if 'Incorrect security code' not in req.response or req.status == 302:
+        table.add(req)
+```
+
+Rate is a little bit better but still under 1rps. also there is an issue when dealing with **Redirections** - its seems the TI doesnt allow processing of redirections and all attempts to show 302 responses in browser yields 'Incorrect security code' messages...
+
+# dont use TI for this task
 
 
-
-
-
-# Vulnerabilities in other authentication mechanisms
+# **Vulnerabilities in other authentication mechanisms**
 https://portswigger.net/web-security/authentication/other-mechanisms
 
 
-
-1. Lab: Brute-forcing a stay-logged-in cookie
+# 1. ***Lab: Brute-forcing a stay-logged-in cookie***
 https://portswigger.net/web-security/authentication/other-mechanisms/lab-brute-forcing-a-stay-logged-in-cookie
 
  To solve the lab, brute-force Carlos's cookie to gain access to his "My account" page. 
@@ -229,7 +324,7 @@ to idntify succsses we can utilixe any of the methds below:
 3. in the *option tab* **Grep-Extract** we can add the location of  \<p>**Your username is: wiener**\</p> (between the \<p> tags)
 
 
-# **4. Lab: Offline password cracking**
+# ***4. Lab: Offline password cracking***
 https://portswigger.net/web-security/authentication/other-mechanisms/lab-offline-password-cracking
 
  To solve the lab, obtain Carlos's stay-logged-in cookie and use it to crack his password. Then, log in as carlos and delete his account from the "My account" page.
@@ -328,7 +423,7 @@ lets repete the deletion process this time on the website and use the newly aqui
 
 # Great!
 
-# 5. Lab: Password reset broken logic
+# ***5. Lab: Password reset broken logic***
 https://portswigger.net/web-security/authentication/other-mechanisms/lab-password-reset-broken-logic
 To solve the lab, reset Carlos's password then log in and access his "My account" page. 
 
@@ -346,7 +441,7 @@ the parameter **username** looks promising - lets repeat the process, **intercep
 
 # Done
 
-# 6. Lab: Password brute-force via password change
+# ***6. Lab: Password brute-force via password change***
 https://portswigger.net/web-security/authentication/other-mechanisms/lab-password-brute-force-via-password-change
 
 To solve the lab, use the list of candidate passwords to brute-force Carlos's account and access his "My account" page. 
@@ -380,25 +475,25 @@ this is agreat tell - we can now make the intruder brute-force to **POST /my-acc
 # Done
 
 
-# Vulnerabilities in password-based login
+# **Vulnerabilities in password-based login**
 https://portswigger.net/web-security/authentication/password-based
 
-# 1. Lab: Username enumeration via different responses
+# ***1. Lab: Username enumeration via different responses***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-different-responses
 
 **see solution above**
 
-# 2. Lab: Username enumeration via subtly different responses
+# ***2. Lab: Username enumeration via subtly different responses***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-subtly-different-responses
 
 **see solution above**
 
-# 3. Lab: Username enumeration via response timing
+# ***3. Lab: Username enumeration via response timing***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-response-timing
 
 **see solution above**
 
-4. Lab: Broken brute-force protection, IP block
+# 4. ***Lab: Broken brute-force protection, IP block***
 https://portswigger.net/web-security/authentication/password-based/lab-broken-bruteforce-protection-ip-block
 
 
@@ -480,7 +575,7 @@ we login to the account with the dicovered payload
 # Done
 
 
-# Lab: Username enumeration via account lock
+# ***Lab: Username enumeration via account lock***
 https://portswigger.net/web-security/authentication/password-based/lab-username-enumeration-via-account-lock
 
 To solve the lab, enumerate a valid username, brute-force this user's password, then access their account page. 
@@ -574,7 +669,7 @@ def handleResponse(req, interesting):
 
  
  
- # 5. Lab: Broken brute-force protection, multiple credentials per request
+ # ***5. Lab: Broken brute-force protection, multiple credentials per request***
  https://portswigger.net/web-security/authentication/password-based/lab-broken-brute-force-protection-multiple-credentials-per-request
 
  To solve the lab, brute-force Carlos's password, then access his account page
@@ -588,100 +683,8 @@ def handleResponse(req, interesting):
 "password",
 "12345678",
 "qwerty",
-"123456789",
-"12345",
-"1234",
-"111111",
-"1234567",
-"dragon",
-"joshua",
-"123123",
-"baseball",
-"abc123",
-"football",
-"monkey",
-"letmein",
-"shadow",
-"master",
-"666666",
-"qwertyuiop",
-"123321",
-"mustang",
-"1234567890",
-"michael",
-"654321",
-"superman",
-"1qaz2wsx",
-"7777777",
-"121212",
-"000000",
-"qazwsx",
-"123qwe",
-"killer",
-"trustno1",
-"jordan",
-"jennifer",
-"zxcvbnm",
-"asdfgh",
-"hunter",
-"buster",
-"soccer",
-"harley",
-"batman",
-"andrew",
-"tigger",
-"sunshine",
-"iloveyou",
-"2000",
-"charlie",
-"robert",
-"thomas",
-"hockey",
-"ranger",
-"daniel",
-"starwars",
-"klaster",
-"112233",
-"george",
-"computer",
-"michelle",
-"jessica",
-"pepper",
-"1111",
-"zxcvbn",
-"555555",
-"11111111",
-"131313",
-"freedom",
-"777777",
-"pass",
-"maggie",
-"159753",
-"aaaaaa",
-"ginger",
-"princess",
-"cheese",
-"amanda",
-"summer",
-"love",
-"ashley",
-"nicole",
-"chelsea",
-"biteme",
-"matthew",
-"access",
-"yankees",
-"987654321",
-"dallas",
-"austin",
-"thunder",
-"taylor",
-"matrix",
-"mobilemail",
-"mom",
-"monitor",
-"monitoring",
-"montana",
+..
+..
 "moon",
 "moscow"
 ],"":""}
