@@ -1,10 +1,10 @@
 # Web cache poisoning
 https://portswigger.net/web-security/web-cache-poisoning
 
-# Exploiting cache design flaws
+# Exploiting cache design flaws (7 labs)
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws
 
-# 1. Lab: Web cache poisoning with an unkeyed header
+# ***1. Lab: Web cache poisoning with an unkeyed header***
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-with-an-unkeyed-header
 
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
@@ -100,7 +100,7 @@ x"}%3balert(1)%3b{"
 
 # POP!
 
-# ***Lab: Web cache poisoning with an unkeyed header***
+# ***3. Lab: Web cache poisoning with an unkeyed header***
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-with-an-unkeyed-header
 
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
@@ -126,7 +126,7 @@ X-Forwarded-Host: "></script><script>alert(document.cookie)</script>//
 
 # POP
 
-# ***3. Lab: Web cache poisoning with multiple headers***
+# ***4. Lab: Web cache poisoning with multiple headers***
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-with-multiple-headers
 
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
@@ -155,7 +155,7 @@ alert(document.cookie)
 
 # POP
 
-# ***4.Lab: Targeted web cache poisoning using an unknown header***
+# ***5.Lab: Targeted web cache poisoning using an unknown header***
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-targeted-using-an-unknown-header
 
 A victim user will view any comments that you post. 
@@ -227,7 +227,7 @@ User-Agent: Mozilla/5.0 (Victim) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/1
 x-host: x"></script><script>alert(document.cookie)</script>
 ```
 
-# ***5. Lab: Web cache poisoning to exploit a DOM vulnerability via a cache with strict cacheability criteria***
+# ***6. Lab: Web cache poisoning to exploit a DOM vulnerability via a cache with strict cacheability criteria***
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-to-exploit-a-dom-vulnerability-via-a-cache-with-strict-cacheability-criteria
 
 To solve the lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
@@ -322,7 +322,7 @@ Access-Control-Allow-Origin: *
 # POP!
 
 
-# ***6. Lab: Combining web cache poisoning vulnerabilities***
+# ***7. Lab: Combining web cache poisoning vulnerabilities***
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-combining-vulnerabilities
 
 A user visits the home page roughly once a minute and their language is set to English. 
@@ -478,6 +478,10 @@ there is no set-cookie header so its good to poison
 
 # POP!
 
+
+
+# Exploiting cache implementation flaws  (7 labs)
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws
 
 
 

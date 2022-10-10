@@ -12,9 +12,9 @@ Origin: <scheme>://<hostname>:<port>
 
 
 # x-forwarded-host
-de-facto standard header for identifying the originating IP address of a client connecting to a web server through a proxy server.
 
-de-facto standard header for identifying the original host requested by the client in the Host HTTP request header. 
+
+de-facto standard header for identifying the originating IP address of a client connecting to a web server through a proxy server.
 
  Host names and ports of reverse proxies (load balancers, CDNs) may differ from the origin server handling the request, in that case the X-Forwarded-Host header is useful to determine which Host was originally used.
 
@@ -30,6 +30,9 @@ X-Forwarded-Host: <host>
 
 
 # x-original-url
+will change the path of the request (using "/path-address" with the original host header)
+
+<!-- header explained:
 represents the original header value received in **HttpContext.Connection** and **HttpContext.Request** When using Nginx/IIS/Apache to setup a reverse proxy.
 
 the original **HttpContext.Request.Scheme** will be saved as header **X-Original-Proto: ...,** 
@@ -40,7 +43,7 @@ the original **HttpContext.Request.Host** will be saved as header **X-Original-H
 
  **HttpContext.Request.Host** will be changed to the left-most host in the header of **X-Forwarded-Host: o1, o2, ...**
 
-the original **HttpContext.Connection.RemoteIpAddress** and **HttpContext.Connection.RemotePort** will be saved as header **OriginalForHeaderName: <original-endpoint>**, and then this value will be changed to left-most IP and port in header of **X-Forwarded-For: o1, o2, ...**
+the original **HttpContext.Connection.RemoteIpAddress** and **HttpContext.Connection.RemotePort** will be saved as header **OriginalForHeaderName: <original-endpoint>**, and then this value will be changed to left-most IP and port in header of **X-Forwarded-For: o1, o2, ...** -->
 
 
 # sec-websocket-version
