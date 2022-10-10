@@ -1,4 +1,7 @@
-# **Authentication vulnerabilities**
+<span style="color:yellow;font-weight:700;font-size:30px">
+Authentication vulnerabilitie
+
+</span>
 https://portswigger.net/web-security/authentication
 
 

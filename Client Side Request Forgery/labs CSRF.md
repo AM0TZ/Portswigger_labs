@@ -1,4 +1,7 @@
+<span style="color:yellow;font-weight:700;font-size:30px">
 Cross-site request forgery (CSRF)
+
+</span>
 https://portswigger.net/web-security/csrf
 
 <!-- 1. Lab: CSRF vulnerability with no defenses -->
