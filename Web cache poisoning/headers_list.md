@@ -1,4 +1,23 @@
-Identified parameter on a850006040a4dc5c0fb6750008500a2.web-security-academy.net:
+# Headers for Cache posioning
+
+# x-get-cache-key
+in 
+
+
+# X-Cache-Key
+defines cache key 
+
+
+# X-HTTP-Method-Override
+You can sometimes encourage "fat GET" handling by overriding the HTTP method, for example:
+    GET /?param=innocent HTTP/1.1
+    Host: innocent-website.com
+    X-HTTP-Method-Override: POST
+    …
+    param=bad-stuff-here
+As long as the X-HTTP-Method-Override header is unkeyed, you could submit a pseudo-POST request while preserving a GET cache key derived from the request line. 
+
+
 
 # origin
 indicates the origin (scheme, hostname, and port) that caused the request. For example, if a user agent needs to request resources included in a page, or fetched by scripts that it executes, then the origin of the page may be included in the request. 

