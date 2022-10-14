@@ -22,6 +22,10 @@ As long as the X-HTTP-Method-Override header is unkeyed, you could submit a pseu
 # origin
 indicates the origin (scheme, hostname, and port) that caused the request. For example, if a user agent needs to request resources included in a page, or fetched by scripts that it executes, then the origin of the page may be included in the request. 
 
+examples:
+    origin: <script>alert(1)</script>
+    Origin: x%0d%0aContent-Length:%208%0d%0a%0d%0aalert(1)$$$$
+
 **syntax**
 ```
 Origin: null
@@ -69,5 +73,9 @@ the original **HttpContext.Connection.RemoteIpAddress** and **HttpContext.Connec
 Request header
 
 Specifies the WebSocket protocol version the client wishes to use, so the server can confirm whether or not that version is supported on its end.
+
+
+
+# X-Original-URL
 
 

