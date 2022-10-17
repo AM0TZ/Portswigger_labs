@@ -226,7 +226,11 @@ https://portswigger.net/web-security/jwt/algorithm-confusion/lab-jwt-authenticat
 
 To solve the lab, first obtain the server's public key. Use this key to sign a modified session token that gives you access to the admin panel at /admin, then delete the user carlos. 
 
-
-
 hint: in linux run docker:
     docker run --rm -it portswigger/sig2n <token1> <token2> 
+
+
+1. Generate 2 JWK by login in and out:
+    eyJraWQiOiI4MTdmNzAyYS03NGMxLTRlNjItYTk3MC0zMzY4ZjU5OGM4MzAiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJwb3J0c3dpZ2dlciIsInN1YiI6IndpZW5lciIsImV4cCI6MTY2NjAyMDg3N30.GxjFOnFsTA18GagxdjaKWR3U6nbent0SvI-Gk2egnA1FgHJcZmFmryfgxUx50I2kxomqnTcpWHQ3TYwcGPq2ulTAR5AVCxtG6M9p-_zN3ZcNoPM3LCV3U2WE8mc5sX1976SKFSJjHS_EZWFlrKQRPrceRB03pSHOniJ9JgjLVeoQWr2CsPmM55EzXJBelVOM3Pc--I-5XrNJc44HTGtYmTTZsb6MWSaCvR2f0jcgHg59cmk-bW2CJYuIqiTxjbblLR1X5ev3MSfX8c44iZE2L_MmJTcs0UqVpBCi04ClhVCV1JpocGxxpSrEFWKUkBNF3eyBJ2w8Y0qmAS7LwK47kw
+
+    eyJraWQiOiI4MTdmNzAyYS03NGMxLTRlNjItYTk3MC0zMzY4ZjU5OGM4MzAiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJwb3J0c3dpZ2dlciIsInN1YiI6IndpZW5lciIsImV4cCI6MTY2NjAyMTEwNH0.B1gpc8ANwHQooqgdPzYsXgMOCv0p7TxQogurFmuChzSWu7C2aStpsNQx0Rmcoy6aEnZUqA4GAipRn9Xqo9yVn3ZV5tChh2PurMGgi5gc9AB2kx2KDnzMGAaXxXJ2vvcKMsFh5IW8JIw6sAQMJexhxFyojT3prmYXoRSbcO_BZwWfCdQvnZW2M15qnYb8kkafsXCND-qb_Zwi6dSJdFC6yjIbRcI7JkI_0teFQHaVmT0-FB4uqAkZa7zmLnnj1su73FWL0yuLI92EQ1s6YxfMHdumJxHPgft3gXQ-5_lIZsvE4BD17mTgq_J_GgqV6xF2Bngrp2f3Sz-vRJoAYjiVbQ
