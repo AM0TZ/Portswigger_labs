@@ -7,8 +7,7 @@ burp0_headers = {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/2
 
 
 # ######################  until here burp paste of request for python  ########################## #
-# code by amotz for:
-# lab: https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses
+# code by amotz for:# lab: https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses
 
 import os
 
