@@ -38,18 +38,6 @@ response:
 
 # Lab Solved!
 
-<!-- Useful commands
-
-    When you have identified an OS command injection vulnerability, it is generally useful to execute some initial commands to obtain information about the system that you have compromised. Below is a summary of some commands that are useful on Linux and Windows platforms:
-    Purpose of command 	    Linux 	        Windows
-    Name of current user 	whoami 	        whoami
-    Operating system 	    uname -a 	    ver
-    Network configuration 	ifconfig 	    ipconfig /all
-    Network connections 	netstat -an 	netstat -an
-    Running processes 	    ps -ef 	        tasklist  
-    -->
-
-
 # ***2. Lab: Blind OS command injection with time delays***
 https://portswigger.net/web-security/os-command-injection/lab-blind-time-delays
 
@@ -166,6 +154,17 @@ Name:   PublicInteractionNLB-3bddf5ff6abb91b6.elb.eu-west-1.amazonaws.com
 Address: 3.248.33.252
 Name:   PublicInteractionNLB-3bddf5ff6abb91b6.elb.eu-west-1.amazonaws.com
 Address: 54.77.139.23 -->
+
+# Useful commands
+
+    When you have identified an OS command injection vulnerability, it is generally useful to execute some initial commands to obtain information about the system that you have compromised. Below is a summary of some commands that are useful on Linux and Windows platforms:
+    Purpose of command 	    Linux 	        Windows
+    Name of current user 	whoami 	        whoami
+    Operating system 	    uname -a 	    ver
+    Network configuration 	ifconfig 	    ipconfig /all
+    Network connections 	netstat -an 	netstat -an
+    Running processes 	    ps -ef 	        tasklist  
+   
 
 # Ways of injecting OS commands
 
