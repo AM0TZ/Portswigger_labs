@@ -1,5 +1,15 @@
 # Headers for Cache posioning
 
+1. X-Original-URL
+2. x-get-cache-key
+3. X-Cache-Key
+4. X-HTTP-Method-Override
+5. origin
+6. x-forwarded-host + X-Forwarded-Scheme = open redirection
+8. sec-websocket-version
+
+
+
 # x-get-cache-key
 in 
 
@@ -76,6 +86,6 @@ Specifies the WebSocket protocol version the client wishes to use, so the server
 
 
 
-# X-Original-URL
+
 
 
