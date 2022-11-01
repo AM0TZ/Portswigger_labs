@@ -1,14 +1,17 @@
-Information disclosure vulnerabilities
+# Information disclosure vulnerabilities
 https://portswigger.net/web-security/information-disclosure
 
-# How to find and exploit information disclosure vulnerabilities
+<span style="color:yellow;font-weight:700;font-size:30px">
+How to find and exploit information disclosure vulnerabilities
+</span>
 https://portswigger.net/web-security/information-disclosure/exploiting
 
 hints:
 /robots.txt
 /sitemap.xml
 
-1. <!-- Lab: Information disclosure in error messages -->
+# ***1. Lab: Information disclosure in error messages***
+
 https://portswigger.net/web-security/information-disclosure/exploiting/lab-infoleak-in-error-messages
 
 To solve the lab, obtain and submit the version number of this framework. 
@@ -19,7 +22,7 @@ get (HTTP/1.1 500 Internal Server Error) - see apache version in the response en
 
 # LEAKED!
 
-2. <!-- Lab: Information disclosure on debug page -->
+# ***2. Lab: Information disclosure on debug page***
 https://portswigger.net/web-security/information-disclosure/exploiting/lab-infoleak-on-debug-page
 
 To solve the lab, obtain and submit the SECRET_KEY environment variable. 
@@ -31,36 +34,52 @@ u2gwtggfknnovlnuq1pp6v5bxn1zqzw5
 
 # lEAKED!
 
-3. <!-- Lab: Source code disclosure via backup files -->
+# ***3. Lab: Source code disclosure via backup files***
 https://portswigger.net/web-security/information-disclosure/exploiting/lab-infoleak-via-backup-files
 
 To solve the lab, identify and submit the database password,
 
+1. **request**:
+```
 GET /robots.txt HTTP/1.1
+```
 response:
+```
 Disallow: /backup
 
+```
+2. **request**:
+```
 GET /backup HTTP/1.1
-response:
-<a href='/backup/ProductTemplate.java.bak'>ProductTemplate.java.bak
 
+```
+response:
+```htm
+<a href='/backup/ProductTemplate.java.bak'>ProductTemplate.java.bak
+```
+
+3. **request**:
+```
 GET /backup/ProductTemplate.java.bak HTTP/1.1
+```
 response: 
+```json
 ConnectionBuilder connectionBuilder = ConnectionBuilder.from(
-                "org.postgresql.Driver",
-                "postgresql",
-                "localhost",
-                5432,
-                "postgres",
-                "postgres",
-                "ucwisrtrnzmu9ss9tqd01g37cidfj3sf"
-        )
+            "org.postgresql.Driver",
+            "postgresql",
+            "localhost",
+            5432,
+            "postgres",
+            "postgres",
+            "ucwisrtrnzmu9ss9tqd01g37cidfj3sf"
+    )
+```
 
 postgres DB password = cauya7395fyj31fe8ueiuhrb7nj6eitb
 
 # lEAKED!
 
-4. <!-- Lab: Authentication bypass via information disclosure -->
+# ***4. Lab: Authentication bypass via information disclosure***
 https://portswigger.net/web-security/information-disclosure/exploiting/lab-infoleak-authentication-bypass
 
 hint:
@@ -98,7 +117,7 @@ method 2 - use match and replace:
 
 
 
-5. <!-- Lab: Information disclosure in version control history -->
+# ***5. Lab: Information disclosure in version control history***
 https://portswigger.net/web-security/information-disclosure/exploiting/lab-infoleak-in-version-control-history
 
 version control:
