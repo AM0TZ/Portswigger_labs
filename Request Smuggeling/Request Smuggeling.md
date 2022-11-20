@@ -10,13 +10,31 @@ https://portswigger.net/research/http-desync-attacks-request-smuggling-reborn
 # ***1.Lab: HTTP request smuggling, basic CL.TE vulnerability***
 https://portswigger.net/web-security/request-smuggling/lab-basic-cl-te
 
-```(to be completed from soultion below...)```
+ This lab involves a front-end and back-end server, and the front-end server doesn't support chunked encoding. The front-end server rejects requests that aren't using the GET or POST method.
 
+To solve the lab, smuggle a request to the back-end server, so that the next request processed by the back-end server appears to use the method GPOST. 
+
+1. send request:
+```
+POST / HTTP/1.1
+Host: 0aa40073033eec32c0e523a2006c0054.web-security-academy.net
+Content-Length: 0
+
+G
+```
+while the front-end CL logic 
+
+
+# Lab Solved
 
 # ***2.Lab: HTTP request smuggling, basic TE.CL vulnerability***
 https://portswigger.net/web-security/request-smuggling/lab-basic-te-cl
 
-```(to be completed from soultion below...)```
+ This lab involves a front-end and back-end server, and the back-end server doesn't support chunked encoding. The front-end server rejects requests that aren't using the GET or POST method.
+
+To solve the lab, smuggle a request to the back-end server, so that the next request processed by the back-end server appears to use the method GPOST. 
+
+
 
 
 # ***3.Lab: HTTP request smuggling, obfuscating the TE header***
@@ -120,7 +138,7 @@ Host: localhost
 
 
 
-if not working check if request has \r\n\r\n in the end
+(*if not working check if request has \r\n\r\n in the end)
 
 
 2. payload:
@@ -156,14 +174,35 @@ Content-Type: application/x-www-form-urlencoded
 Content-Length: 53
 
 csrf=DHagB4bCjIHsqTfd7d05kyFDOmPbthrM&username=carlos
-
-lab solved
-
-pointers:
-content length should be correct otherwise intruder pause filter will fail
 ```
+(*content length must be correct otherwise intruder pause-filter will fail)
 
-# Lab Solved
+# Lab solved
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

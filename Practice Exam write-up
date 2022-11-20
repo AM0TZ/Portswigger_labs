@@ -1,0 +1,57 @@
+
+Rules:
+
+users:
+- administrator account: "administrator"
+- lower-privileged account:  "carlos"
+
+1 active user at every lab:
+- logged in
+- vists homepage every 15 minute
+- clicks any link send to their email via exploit server
+
+in SSRF localhost available at port 6566
+host headers *_lab* and *_lab_analytics* cookies excluded from lab
+
+
+Stage 1: Access any user account.
+
+Stage 2: Use your user account to access the admin interface at /admin, perhaps by elevating your privileges or compromising the administrator account.
+
+Stage 3: Use the admin interface to read the contents of /home/carlos/secret from the server's filesystem, and submit it using "submit solution".
+
+
+practice exam:
+1. tour site with burp open and additional scanner engaged.
+scanner:
+```
+Possible DOM-based Cross-site scripting 
+/resources/js/searchResults.js
+/
+```
+
+2. check:
+request:
+```
+GET /resources/js/searchResults.js HTTP/1.1
+```
+response 200 OK:
+```js
+function search(path) {
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            eval('var searchResultsObj = ' + this.responseText);
+            displaySearchResults(searchResultsObj);
+```
+3. break:
+```js
+'
+```
+
+
+
+
+
+
+
