@@ -165,7 +165,12 @@ eval('var searchResultsObj = ' + this.responseText)
 ```
 
 **payload:**
+mine:
+```json
+\"};alert()//
 ```
+portswigger:
+```json
 \"-alert()}//
 ```
 full payload request to test in browser:
@@ -184,7 +189,7 @@ HTTP/1.1 200 OK
 [to the Lab](https://portswigger.net/web-security/cross-site-scripting/dom-based/lab-dom-xss-stored)
 
 payload:
-```
+```htm
 <><img src=1 onerror=alert(1)>
 ```
 
