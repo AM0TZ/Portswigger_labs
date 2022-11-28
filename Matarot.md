@@ -76,7 +76,7 @@ GET /image?filename=../../../etc/passwd%00.png HTTP/1.1
 
 
 # XML
-
+=========
 To solve the lab, inject an XML external entity to retrieve the contents of the /etc/passwd file. 
 
 **request**:
@@ -91,6 +91,7 @@ POST /product/stock HTTP/1.1
 ```
 To solve the lab, exploit the XXE vulnerability to perform an SSRF attack that obtains the server's IAM secret access key from the EC2 metadata endpoint. 
 
+=========
 
 **what we know:**
 EC2 metadata endpoint -  http://169.254.169.254/
