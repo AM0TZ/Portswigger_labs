@@ -4,11 +4,9 @@ Web cache poisoning
 </span>
 https://portswigger.net/web-security/web-cache-poisoning
 
-# Exploiting cache design flaws (7 labs)
-https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws
+# [Exploiting cache design flaws (7 labs)](https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws)
 
-# ***1. Lab: Web cache poisoning with an unkeyed header***
-https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-with-an-unkeyed-header
+# [***1. Lab: Web cache poisoning with an unkeyed header***](https://portswigger.net/web-security/web-cache-poisoning/exploiting-design-flaws/lab-web-cache-poisoning-with-an-unkeyed-header)
 
 To solve this lab, poison the cache with a response that executes alert(document.cookie) in the visitor's browser. 
 
