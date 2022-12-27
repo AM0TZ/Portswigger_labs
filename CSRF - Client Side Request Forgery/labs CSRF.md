@@ -4,8 +4,7 @@ Cross-site request forgery (CSRF)
 </span>
 https://portswigger.net/web-security/csrf
 
-<!-- 1. Lab: CSRF vulnerability with no defenses -->
-https://portswigger.net/web-security/csrf/lab-no-defenses
+# ***[1. Lab: CSRF vulnerability with no defenses]***(https://portswigger.net/web-security/csrf/lab-no-defenses)
 
 goal:
 To solve the lab, craft some HTML that uses a CSRF attack to change the viewer's email address and upload it to your exploit server.
@@ -52,8 +51,7 @@ if site supports GET it can be done in a single line (without need for a site):
 
 
 
-<!-- 2. Lab: CSRF where token validation depends on request method -->
-https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-request-method
+# ***[2. Lab: CSRF where token validation depends on request method]***(https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-request-method)
 
 To solve the lab, use your exploit server to host an HTML page that uses a CSRF attack to change the viewer's email address. 
 smae as last lab - just change requets to GET:

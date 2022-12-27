@@ -18,8 +18,9 @@ req:
 POST /login HTTP/1
 ...
 username=a&password=a
-
+```
 res:
+```
 HTTP/1.1 200 OK
 ..
 Invalid username
@@ -115,7 +116,7 @@ https://portswigger.net/web-security/authentication/multi-factor
 # ***1. Lab: 2FA simple bypass***
 https://portswigger.net/web-security/authentication/multi-factor/lab-2fa-simple-bypass
 
-To solve the lab, access Carlos's account page. To solve the lab, access Carlos's account page. 
+To solve the lab, access Carlos's account page.  
 
 as hinted: verification process is flawed and log-in occures already after stage 1 - so all we need to do is to avoid filling the 4 digit code and directly go to / and from there to my-account to solve the lab
 
