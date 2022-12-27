@@ -4,7 +4,7 @@ Cross-site request forgery (CSRF)
 </span>
 https://portswigger.net/web-security/csrf
 
-# ***[1. Lab: CSRF vulnerability with no defenses]***(https://portswigger.net/web-security/csrf/lab-no-defenses)
+# [1. Lab: CSRF vulnerability with no defenses](https://portswigger.net/web-security/csrf/lab-no-defenses)
 
 goal:
 To solve the lab, craft some HTML that uses a CSRF attack to change the viewer's email address and upload it to your exploit server.
@@ -51,7 +51,7 @@ if site supports GET it can be done in a single line (without need for a site):
 
 
 
-# ***[2. Lab: CSRF where token validation depends on request method]***(https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-request-method)
+# [2. Lab: CSRF where token validation depends on request method](https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-request-method)
 
 To solve the lab, use your exploit server to host an HTML page that uses a CSRF attack to change the viewer's email address. 
 smae as last lab - just change requets to GET:
@@ -92,8 +92,7 @@ https://0a3a009803bd4ed7c0a6186c000500e5.web-security-academy.net/my-account/cha
 </html>
 
 
-<!-- 3. Lab: CSRF where token validation depends on token being present -->
-https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-token-being-present
+# [3. Lab: CSRF where token validation depends on token being present](https://portswigger.net/web-security/csrf/lab-token-validation-depends-on-token-being-present)
 
 To solve the lab, use your exploit server to host an HTML page that uses a CSRF attack to change the viewer's email address.
 
@@ -110,9 +109,7 @@ ommit the CSRF header in exploit site it as if it has no csrf (pretty dumb appli
     </body>
 </html>!
 
-<!-- 4. Lab: CSRF where token is not tied to user session -->
-https://portswigger.net/web-security/csrf/lab-token-not-tied-to-user-session
-
+# [4. Lab: CSRF where token is not tied to user session](https://portswigger.net/web-security/csrf/lab-token-not-tied-to-user-session)
 
 To solve the lab, use your exploit server to host an HTML page that uses a CSRF attack to change the viewer's email address. 
 
@@ -141,8 +138,7 @@ working exploit:
 </html>
 
 
-<!-- 5.Lab: CSRF where token is tied to non-session cookie -->
-https://portswigger.net/web-security/csrf/lab-token-tied-to-non-session-cookie
+# [5.Lab: CSRF where token is tied to non-session cookie](https://portswigger.net/web-security/csrf/lab-token-tied-to-non-session-cookie)
 
 
 1. change csrf value - 400 "Invalid CSRF token"
@@ -178,8 +174,7 @@ final cookie-injecting payload:
 
 
     
-<!-- 6. Lab: CSRF where token is duplicated in cookie -->
-https://portswigger.net/web-security/csrf/lab-token-duplicated-in-cookie
+# [6. Lab: CSRF where token is duplicated in cookie](https://portswigger.net/web-security/csrf/lab-token-duplicated-in-cookie)
 
 1. check relation between csrf and csrfKey, check if any string will work as long as it will be identical between the 2 param
 
@@ -201,8 +196,7 @@ https://0a5500bd03baf0c5c079115e00af0056.web-security-academy.net/?search=bla%0d
 
 note2self: not like lab 5 - there is no csrfKey - just csrf in both locations...
 
-<!-- 7. Lab: CSRF where Referer validation depends on header being present -->
-https://portswigger.net/web-security/csrf/lab-referer-validation-depends-on-header-being-present
+# [7. Lab: CSRF where Referer validation depends on header being present](https://portswigger.net/web-security/csrf/lab-referer-validation-depends-on-header-being-present)
 
 goal:
 To solve the lab, use your exploit server to host an HTML page that uses a CSRF attack to change the viewer's email address.
@@ -244,8 +238,7 @@ https://moz.com/blog/meta-referrer-tag#How%20to%20use%20the%20meta%20referrer%20
 https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
 
 
-<!-- 8. Lab: CSRF with broken Referer validation -->
-https://portswigger.net/web-security/csrf/lab-referer-validation-broken
+# [8. Lab: CSRF with broken Referer validation](https://portswigger.net/web-security/csrf/lab-referer-validation-broken)
 
 goal:
 To solve the lab, use your exploit server to host an HTML page that uses a CSRF attack to change the viewer's email address. 
