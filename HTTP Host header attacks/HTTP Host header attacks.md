@@ -7,16 +7,35 @@ https://portswigger.net/web-security/host-header
 https://portswigger.net/web-security/host-header/exploiting
 
 How to identify and exploit HTTP Host header vulnerabilities:
-1. Check for flawed validation
-2. Inject duplicate Host headers
-3. Supply an absolute URL
-4. Add line wrapping ( by indentation)
-5. Inject host override headers (X-Forwarded-Host / X-Host / X-Forwarded-Server / X-HTTP-Host-Override / Forwarded)
+1. Supply an arbitrary Host header
+2. Check for flawed validation
+3. Send ambiguous requests
+- Inject duplicate Host headers
+- Supply an absolute URL
+5. Add line wrapping ( by indentation)
+6. Inject host override headers (X-Forwarded-Host / X-Host / X-Forwarded-Server / X-HTTP-Host-Override / Forwarded)
 
+examples:
+***using non-numeric port:***
+```
+GET /example HTTP/1.1
+Host: vulnerable-website.com:bad-stuff-here
+```
+```
+GET /example HTTP/1.1
+Host: hacked-subdomain.vulnerable-website.com
+```
+```duplicate host headers:
+GET /example HTTP/1.1
+Host: vulnerable-website.com
+Host: bad-stuff-here
+```
 
-# ***1. Lab: Web cache poisoning via the Host header***
-https://portswigger.net/web-security/host-header/exploiting/lab-host-header-web-cache-poisoning-via-ambiguous-requests
- To solve the lab, poison the cache so the home page executes alert(document.cookie) in the victim's browser. 
+# ***[1. Lab: Web cache poisoning via the Host header](https://portswigger.net/web-security/host-header/exploiting/lab-host-header-web-cache-poisoning-via-ambiguous-requests)***
+
+ This lab is vulnerable to web cache poisoning due to discrepancies in how the cache and the back-end application handle ambiguous requests. An unsuspecting user regularly visits the site's home page.
+
+To solve the lab, poison the cache so the home page executes alert(document.cookie) in the victim's browser. 
 
  xss shit
 
@@ -49,8 +68,7 @@ https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 **XSSed the Cache**
 
 
-# ***2. Lab: Host header authentication bypass***
-https://portswigger.net/web-security/host-header/exploiting/lab-host-header-authentication-bypass
+# ***[2. Lab: Host header authentication bypass](https://portswigger.net/web-security/host-header/exploiting/lab-host-header-authentication-bypass)***
 
 To solve the lab, access the admin panel and delete Carlos's account. 
 

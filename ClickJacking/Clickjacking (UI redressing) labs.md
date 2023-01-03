@@ -5,7 +5,7 @@ Clickjacking (UI redressing)
 https://portswigger.net/web-security/clickjacking
 
 #
-"Let me tell *you* something, pendejo. You pull any of your crazy shit with us, you flash a piece out on the lanes, I'll take it away from you, and stick it up your ass and pull the fucking trigger 'til it goes **click**"   
+"Let me tell **you** something, pendejo. You pull any of your crazy shit with us, you flash a piece out on the lanes, I'll take it away from you, and stick it up your ass and pull the fucking trigger 'til it goes **click**"   
 
 *Jesus Quintana (The Big Lebowski)*
 

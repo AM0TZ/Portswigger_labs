@@ -20,6 +20,6 @@ for i in range(0,256):
 
 
 
-    #         for i in range(0,255):
-    # for ii in range(0,255):
+    # for i in range(0,255):
+    #   for ii in range(0,255):
     #     host = f'"192.168.{i}.{ii}"'
